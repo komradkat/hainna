@@ -1,14 +1,121 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hainna - Django</title>
+    <title>{% block title %}Hainna Admin Console{% endblock %}</title>
+    
+    <!-- Modern Stack CDNs -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Icons & Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .leaflet-container { background: #0f172a !important; }
+    </style>
+    {% block extra_head %}{% endblock %}
 </head>
-<body>
-    {% block content %}
-    <h1>Welcome to Hainna</h1>
-    <p>Django project initialized successfully with uv and environment variables.</p>
-    {% endblock %}
+<body class="bg-base-300 text-base-content min-h-screen overflow-hidden" x-data="{ showGuide: false }">
+    <!-- Alpine.js Modal -->
+    <template x-if="showGuide">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" x-transition>
+            <div class="bg-base-100 border border-white/10 rounded-xl max-w-lg w-full p-8 shadow-2xl" @click.away="showGuide = false">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">System Guide</h3>
+                    <button class="btn btn-ghost btn-sm btn-circle" @click="showGuide = false">✕</button>
+                </div>
+                <div class="space-y-4 text-sm text-base-content/80">
+                    <p>Welcome to the <span class="text-blue-500 font-bold">Hainna Admin Console</span>. Here's a quick overview of how to navigate the system:</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><span class="font-bold">Sidebar Navigation</span>: Access disparate modules like Fleet Security and Reports.</li>
+                        <li><span class="font-bold">Live Tracking</span>: Real-time map view of all transit units.</li>
+                        <li><span class="font-bold">System Status</span>: Monitor real-time status updates via HTMX polling.</li>
+                    </ul>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button class="btn btn-primary px-8" @click="showGuide = false">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <div class="flex flex-col h-screen">
+        <!-- Top Navbar -->
+        <header class="navbar bg-base-100 border-b border-white/10 px-4 h-16 z-50">
+            <div class="flex-1 gap-4">
+                <label for="my-drawer-2" class="btn btn-ghost drawer-button lg:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
+                </label>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="text-sm font-bold tracking-wider uppercase text-white">Hainna Express</h1>
+                        <p class="text-[10px] text-base-content/60 uppercase">Admin Console</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-none gap-6 items-center">
+                <!-- HTMX Polling for Status -->
+                <div class="hidden md:block" 
+                     hx-get="{% url 'system_status' %}" 
+                     hx-trigger="every 10s, load" 
+                     hx-target="this">
+                    <div class="flex items-center gap-2 text-xs font-semibold animate-pulse opacity-50">
+                        <span class="text-base-content/60">STATUS</span>
+                        <div class="w-2 h-2 bg-gray-500 rounded-full"></div>
+                        <span class="text-gray-500">INITIALIZING...</span>
+                    </div>
+                </div>
+                
+                <div id="clock" class="text-xl font-bold font-mono tracking-tight hidden lg:block text-white">00:00:00</div>
+                
+                <div class="flex gap-2">
+                    <button class="btn btn-sm btn-ghost uppercase text-[10px] tracking-widest hidden sm:flex">Passenger View</button>
+                    <button class="btn btn-sm btn-primary uppercase text-[10px] tracking-widest" @click="showGuide = true">System Guide</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar & Main Content using Drawer -->
+        <div class="drawer lg:drawer-open flex-1 overflow-hidden">
+            <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+            <div class="drawer-content flex flex-col overflow-hidden">
+                <!-- Main Content Area -->
+                <main class="flex-1 relative overflow-hidden bg-black">
+                    {% block content %}{% endblock %}
+                </main>
+            </div> 
+            
+            <aside class="drawer-side z-40">
+                <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
+                <div class="w-72 min-h-full bg-base-200 border-r border-white/5 flex flex-col">
+                    {% block sidebar %}{% endblock %}
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
+            const clockEl = document.getElementById('clock');
+            if (clockEl) clockEl.textContent = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block sidebar %}
+<div class="flex flex-col h-full bg-base-200">
+    <div class="p-4">
+        <ul class="menu menu-md w-full gap-1 p-0">
+            <li class="menu-title text-xs font-bold uppercase tracking-widest text-base-content/40 mt-2 mb-1">Main Navigation</li>
+            <li>
+                <a href="#" class="active flex items-center gap-3 py-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 py-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span class="font-medium">Live Tracking</span>
+                    <span class="badge badge-sm badge-info font-bold ml-auto text-[10px]">LIVE</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 py-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span class="font-medium">Fleet Security</span>
+                </a>
+            </li>
+
+            <li class="menu-title text-xs font-bold uppercase tracking-widest text-base-content/40 mt-6 mb-1">Internal Operations</li>
+            <li>
+                <a href="#" class="flex items-center gap-3 py-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span class="font-medium">Personnel</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 py-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span class="font-medium">Schedules</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 py-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span class="font-medium">Reports</span>
+                </a>
+            </li>
+
+            <li class="menu-title text-xs font-bold uppercase tracking-widest text-base-content/40 mt-6 mb-1">System Management</li>
+            <li>
+                <a href="#" class="flex items-center gap-3 py-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span class="font-medium">Settings</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- User Section -->
+    <div class="mt-auto p-4 border-t border-white/5 bg-base-300/50">
+        <div class="flex items-center gap-3">
+            <div class="avatar placeholder">
+                <div class="bg-blue-600/20 text-blue-600 rounded-full w-10">
+                    <span class="text-xs font-bold">JD</span>
+                </div>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-bold truncate">Jane Doe</p>
+                <p class="text-[10px] text-base-content/50 uppercase tracking-tighter">System Admin</p>
+            </div>
+            <button class="btn btn-ghost btn-xs btn-circle text-base-content/40 hover:text-error">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="map" class="w-full h-full"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize Leaflet map
+    const map = L.map('map', {
+        zoomControl: false,
+        attributionControl: false
+    }).setView([11.24, 124.99], 11);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(map);
+
+    L.control.zoom({
+        position: 'topleft'
+    }).addTo(map);
+
+    // Mock markers
+    const markers = [
+        {pos: [11.24, 125.00], label: "Unit #05"},
+        {pos: [11.30, 124.90], label: "Unit #08"},
+        {pos: [11.15, 124.95], label: "Unit #12"}
+    ];
+
+    const blueIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div class="w-3 h-3 bg-blue-600 border-2 border-white rounded-full shadow-[0_0_10px_theme(colors.blue.600)]"></div>`,
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+    });
+
+    markers.forEach(m => {
+        L.marker(m.pos, {icon: blueIcon}).addTo(map);
+    });
+</script>
+
+<style>
+    /* Styling for Leaflet controls using Tailwind-like colors */
+    .leaflet-bar {
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        background: #1e293b !important;
+        border-radius: 8px !important;
+        overflow: hidden;
+    }
+    .leaflet-bar a {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    .leaflet-bar a:hover {
+        background: #334155 !important;
+    }
+</style>
+{% endblock %}
