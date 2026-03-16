@@ -21,10 +21,12 @@ class DashboardView(HtmxTemplateMixin, TemplateView):
             'efficiency': '92%',
             'on_time_rate': '98.5%'
         }
-        # Mock recent alerts
-        context['alerts'] = [
-            {'unit': 'Unit #05', 'type': 'Deviation', 'priority': 'high', 'time': '5m ago'},
-            {'unit': 'Unit #12', 'type': 'Stalled', 'priority': 'medium', 'time': '12m ago'},
+        # Mock vehicles in transit
+        context['vehicles'] = [
+            {'id': 'Unit #05', 'driver': 'Marco Dela Cruz', 'status': 'Moving', 'eta': '12m', 'destination': 'North Port'},
+            {'id': 'Unit #08', 'driver': 'Juan Luna', 'status': 'Moving', 'eta': '8m', 'destination': 'Central Station'},
+            {'id': 'Unit #12', 'driver': 'Elena Santos', 'status': 'Delayed', 'eta': '25m', 'destination': 'South Terminal'},
+            {'id': 'Unit #03', 'driver': 'Rico Reyes', 'status': 'Moving', 'eta': '5m', 'destination': 'Airport Road'},
         ]
         return context
 
