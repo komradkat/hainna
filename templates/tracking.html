@@ -1,0 +1,47 @@
+{% extends base_template|default:'base.html' %}
+
+{% block title %}Hainna - Live Tracking{% endblock %}
+
+{% block content %}
+<div id="map-full" class="w-full h-full"></div>
+
+<script>
+    // Initialize Leaflet map
+    // We recreate it here because htmx swaps the content
+    (function() {
+        const mapEl = document.getElementById('map-full');
+        if (!mapEl) return;
+        
+        const mapTracking = L.map(mapEl, {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([11.24, 124.99], 12);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(mapTracking);
+
+        L.control.zoom({
+            position: 'topleft'
+        }).addTo(mapTracking);
+
+        const units = [
+            {% for unit in units %}
+            {pos: {{ unit.pos }}, id: "{{ unit.id }}", name: "{{ unit.name }}"},
+            {% endfor %}
+        ];
+
+        const blueIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div class="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-[0_0_15px_theme(colors.blue.600)] animate-pulse"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        units.forEach(u => {
+            L.marker(u.pos, {icon: blueIcon}).addTo(mapTracking).bindPopup(`<b>${u.id}</b><br>${u.name}`);
+        });
+    })();
+</script>
+{% endblock %}
