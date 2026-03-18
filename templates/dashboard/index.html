@@ -137,7 +137,8 @@
                 iconAnchor: [4, 4]
             });
 
-            [[11.24, 125.00], [11.30, 124.90], [11.15, 124.95]].forEach(pos => {
+            // Removed hardcoded markers for clean state
+            [].forEach(pos => {
                 L.marker(pos, { icon: blueIconSmall }).addTo(miniMap);
             });
 

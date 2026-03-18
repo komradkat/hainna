@@ -85,6 +85,8 @@
                         <span class="text-[9px] font-bold text-blue-500/60 ml-auto">{{ route.active_units }} units</span>
                     </div>
                 </div>
+                {% empty %}
+                <div class="p-6 text-center text-[10px] font-black uppercase tracking-widest text-white/30">No active routes</div>
                 {% endfor %}
             </div>
         </div>
@@ -318,11 +320,7 @@
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 17 }).addTo(map);
 
         // Sample route polylines
-        const routes = [
-            { points: [[11.24, 125.00], [11.30, 124.90]], color: '#3b82f6' },
-            { points: [[11.15, 124.95], [11.25, 125.05]], color: '#10b981' },
-            { points: [[11.30, 124.90], [11.15, 124.95]], color: '#f59e0b' },
-        ];
+        const routes = [];
         routes.forEach(r => {
             L.polyline(r.points, { color: r.color, weight: 3, opacity: 0.8, dashArray: '8 4' }).addTo(map);
         });

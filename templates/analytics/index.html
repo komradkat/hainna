@@ -59,6 +59,8 @@
                         <div class="w-full rounded-t-lg transition-all" style="height: {{ bar.pct }}%; background: linear-gradient(to top, #1d4ed8, #3b82f6); min-height: 4px;"></div>
                         <span class="text-[8px] font-bold text-white/30">{{ bar.day }}</span>
                     </div>
+                    {% empty %}
+                    <div class="text-center py-6 text-[10px] font-black uppercase tracking-widest text-white/30">No trips data</div>
                     {% endfor %}
                 </div>
             </div>
@@ -81,6 +83,8 @@
                         <div class="w-full rounded-t-lg transition-all" style="height: {{ bar.pct }}%; background: linear-gradient(to top, #92400e, #f59e0b); min-height: 4px;"></div>
                         <span class="text-[8px] font-bold text-white/30">{{ bar.month }}</span>
                     </div>
+                    {% empty %}
+                    <div class="text-center py-6 text-[10px] font-black uppercase tracking-widest text-white/30">No fuel data</div>
                     {% endfor %}
                 </div>
             </div>
@@ -125,6 +129,8 @@
                             </div>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="py-12 text-center text-[10px] font-black uppercase tracking-widest text-white/30">No vehicle performance data</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -147,6 +153,8 @@
                             <div class="h-full rounded-full" style="width: {{ route.pct }}%; background: {{ route.color }};"></div>
                         </div>
                     </div>
+                    {% empty %}
+                    <div class="text-center py-6 text-[10px] font-black uppercase tracking-widest text-white/30">No route data</div>
                     {% endfor %}
                 </div>
             </div>
@@ -168,6 +176,8 @@
                             </div>
                         </div>
                     </div>
+                    {% empty %}
+                    <div class="col-span-2 text-center py-6 text-[10px] font-black uppercase tracking-widest text-white/30">No status data</div>
                     {% endfor %}
                 </div>
             </div>

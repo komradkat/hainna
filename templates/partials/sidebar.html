@@ -160,6 +160,21 @@
                 <span class="font-bold text-sm tracking-tight text-white/70 group-hover:text-white">Personnel</span>
             </a>
         </li>
+        <li>
+            <a href="{% url 'users' %}" hx-get="{% url 'users' %}" hx-target="main" hx-push-url="true"
+                :class="{ 'active': activeTab === 'users' }" @click="activeTab = 'users'"
+                class="flex items-center gap-3 py-3 rounded-lg group">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"
+                    class="opacity-50 group-hover:opacity-100 transition-opacity">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="17" y1="11" x2="23" y2="11"></line>
+                </svg>
+                <span class="font-bold text-sm tracking-tight text-white/70 group-hover:text-white">User Management</span>
+            </a>
+        </li>
     </ul>
 </div>
 
