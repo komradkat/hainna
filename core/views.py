@@ -62,6 +62,24 @@ class FleetVehiclesView(HtmxTemplateMixin, TemplateView):
         ]
         return context
 
+class DriversView(HtmxTemplateMixin, TemplateView):
+    template_name = 'drivers/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['drivers'] = [
+            {'id': 'DRV-001', 'name': 'Marco Dela Cruz', 'license': 'D01-12-345678', 'contact': '+63 912 345 6789', 'status': 'Active', 'vehicle': 'Isuzu Giga (ABC-1234)', 'trips': 142, 'rating': 4.9, 'joined': 'Jan 2022'},
+            {'id': 'DRV-002', 'name': 'Juan Luna', 'license': 'D01-98-765432', 'contact': '+63 917 654 3210', 'status': 'Active', 'vehicle': 'Hino 500 (XYZ-5678)', 'trips': 98, 'rating': 4.7, 'joined': 'Mar 2023'},
+            {'id': 'DRV-003', 'name': 'Elena Santos', 'license': 'D02-11-223344', 'contact': '+63 920 111 2233', 'status': 'On Leave', 'vehicle': 'Fuso Super Great (LMN-9012)', 'trips': 210, 'rating': 4.8, 'joined': 'Aug 2021'},
+            {'id': 'DRV-004', 'name': 'Rico Reyes', 'license': 'D03-55-667788', 'contact': '+63 905 556 6778', 'status': 'Off Duty', 'vehicle': 'Ud Quon (QRS-3456)', 'trips': 75, 'rating': 4.5, 'joined': 'Jun 2023'},
+            {'id': 'DRV-005', 'name': 'Anton Ramos', 'license': 'D01-44-556677', 'contact': '+63 918 445 5667', 'status': 'Active', 'vehicle': 'Scania R500 (JKL-7890)', 'trips': 187, 'rating': 4.6, 'joined': 'Nov 2021'},
+            {'id': 'DRV-006', 'name': 'Santi Go', 'license': 'D02-33-445566', 'contact': '+63 933 334 4556', 'status': 'Active', 'vehicle': 'Isuzu Elf (DEF-1122)', 'trips': 63, 'rating': 4.3, 'joined': 'Sep 2024'},
+            {'id': 'DRV-007', 'name': 'Lito Lapid', 'license': 'D01-77-889900', 'contact': '+63 922 778 8990', 'status': 'Off Duty', 'vehicle': 'Man TGX (GHI-3344)', 'trips': 301, 'rating': 4.9, 'joined': 'Feb 2020'},
+            {'id': 'DRV-008', 'name': 'Bong Revilla', 'license': 'D03-22-334455', 'contact': '+63 908 223 3445', 'status': 'Active', 'vehicle': 'Fuso Canter (JKL-5566)', 'trips': 129, 'rating': 4.4, 'joined': 'Apr 2022'},
+        ]
+        context['stats'] = {'active': 5, 'off_duty': 2, 'on_leave': 1, 'total': 8}
+        return context
+
 def system_status(request):
     now = datetime.datetime.now().strftime("%H:%M:%S")
-    return render(request, 'partials/status_badge.html', {'time': now})  # stays in partials
+    return render(request, 'partials/status_badge.html', {'time': now})

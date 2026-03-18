@@ -30,12 +30,14 @@
               const path = window.location.pathname;
               if (path.includes('live-tracking')) this.activeTab = 'tracking';
               else if (path.includes('fleet-vehicles')) this.activeTab = 'fleet';
+              else if (path.includes('drivers')) this.activeTab = 'drivers';
               else this.activeTab = 'dashboard';
 
               document.addEventListener('htmx:afterOnLoad', () => {
                   const newPath = window.location.pathname;
                   if (newPath.includes('live-tracking')) this.activeTab = 'tracking';
                   else if (newPath.includes('fleet-vehicles')) this.activeTab = 'fleet';
+                  else if (newPath.includes('drivers')) this.activeTab = 'drivers';
                   else this.activeTab = 'dashboard';
               });
           }
