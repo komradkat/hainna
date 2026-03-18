@@ -23,7 +23,24 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-base-300 text-base-content min-h-screen overflow-hidden" x-data="{ showGuide: false }">
+<body class="bg-base-300 text-base-content min-h-screen overflow-hidden" 
+      x-data="{ 
+          showGuide: false, 
+          activeTab: 'dashboard',
+          init() {
+              const path = window.location.pathname;
+              if (path.includes('live-tracking')) this.activeTab = 'tracking';
+              else if (path.includes('fleet-vehicles')) this.activeTab = 'fleet';
+              else this.activeTab = 'dashboard';
+              
+              document.addEventListener('htmx:afterOnLoad', (e) => {
+                  const newPath = window.location.pathname;
+                  if (newPath.includes('live-tracking')) this.activeTab = 'tracking';
+                  else if (newPath.includes('fleet-vehicles')) this.activeTab = 'fleet';
+                  else this.activeTab = 'dashboard';
+              });
+          }
+      }">
     <!-- Alpine.js Modal -->
     <template x-if="showGuide">
         <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" x-transition>
@@ -105,22 +122,28 @@
             </div>
         </header>
 
-        <!-- Sidebar & Main Content using Drawer -->
-        <div class="drawer lg:drawer-open flex-1 overflow-hidden">
-            <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
-            <div class="drawer-content flex flex-col overflow-hidden">
-                <!-- Main Content Area -->
-                <main class="flex-1 relative overflow-hidden bg-black">
-                    {% block content %}{% endblock %}
-                </main>
-            </div> 
-            
-            <aside class="drawer-side z-[1050] lg:top-24 lg:h-[calc(100vh-6rem)]">
-                <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
-                <div class="w-72 h-full bg-base-200 border-r border-white/5 flex flex-col overflow-hidden">
-                    {% include 'partials/sidebar.html' %}
-                </div>
+        <!-- Sidebar & Main Content -->
+        <div class="flex-1 flex overflow-hidden relative">
+            <!-- Sidebar (Desktop) -->
+            <aside class="hidden lg:flex w-72 h-full bg-base-200 border-r border-white/5 flex flex-col overflow-hidden shrink-0">
+                {% include 'partials/sidebar.html' %}
             </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 relative overflow-hidden bg-black">
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- Mobile Drawer (Overlay) -->
+            <div class="drawer lg:hidden absolute inset-0 z-[1050] pointer-events-none">
+                <input id="my-drawer-2" type="checkbox" class="drawer-toggle pointer-events-auto" />
+                <div class="drawer-side h-full pointer-events-auto">
+                    <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
+                    <div class="w-72 h-full bg-base-200 flex flex-col overflow-hidden">
+                        {% include 'partials/sidebar.html' %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

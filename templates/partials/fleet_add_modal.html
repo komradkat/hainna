@@ -1,0 +1,65 @@
+<!-- Add Vehicle Modal -->
+<div x-show="addModalOpen" 
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="absolute inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
+    
+    <div @click.away="addModalOpen = false"
+         x-show="addModalOpen"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95 translate-y-8"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         class="bg-[#0A0B10] border border-white/10 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl">
+        
+        <!-- Modal Header -->
+        <div class="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+            <div>
+                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-1">New Registration</h3>
+                <h2 class="text-2xl font-black text-white tracking-tight">Add Fleet Vehicle</h2>
+            </div>
+            <button @click="addModalOpen = false" class="text-white/20 hover:text-white transition-colors">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <form class="p-8 space-y-6" @submit.prevent="addModalOpen = false; alert('Vehicle registered successfully!')">
+            <!-- General Information -->
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Vehicle Type</label>
+                    <select class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                        <option class="bg-[#0A0B10]">Semi-Trailer</option>
+                        <option class="bg-[#0A0B10]">Box Truck</option>
+                        <option class="bg-[#0A0B10]">Flatbed</option>
+                        <option class="bg-[#0A0B10]">Refrigerated</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Make & Model</label>
+                    <input type="text" placeholder="e.g. Isuzu Giga" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                </div>
+            </div>
+
+            <!-- Registration & Driver -->
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Plate Number</label>
+                    <input type="text" placeholder="XXX-0000" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all uppercase">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Assigned Driver</label>
+                    <input type="text" placeholder="Search driver..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                </div>
+            </div>
+
+            <div class="pt-4 flex gap-4">
+                <button type="button" @click="addModalOpen = false" class="flex-1 px-6 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
+                <button type="submit" class="flex-[2] px-6 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Register Vehicle</button>
+            </div>
+        </form>
+    </div>
+</div>

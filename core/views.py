@@ -44,6 +44,24 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
         ]
         return context
 
+class FleetVehiclesView(HtmxTemplateMixin, TemplateView):
+    template_name = 'fleet_vehicles.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Enriched mock data for fleet management
+        context['vehicles'] = [
+            {'id': 'Unit #01', 'type': 'Semi-Trailer', 'make_model': 'Isuzu Giga', 'plate': 'ABC-1234', 'status': 'Active', 'location': 'Manila Hub', 'last_service': '2024-02-15', 'driver': 'Marco Dela Cruz'},
+            {'id': 'Unit #02', 'type': 'Box Truck', 'make_model': 'Hino 500', 'plate': 'XYZ-5678', 'status': 'Maintenance', 'location': 'Quezon Service', 'last_service': '2024-03-10', 'driver': 'Juan Luna'},
+            {'id': 'Unit #03', 'type': 'Semi-Trailer', 'make_model': 'Fuso Super Great', 'plate': 'LMN-9012', 'status': 'Active', 'location': 'Airport Road', 'last_service': '2024-01-20', 'driver': 'Elena Santos'},
+            {'id': 'Unit #04', 'type': 'Flatbed', 'make_model': 'Ud Quon', 'plate': 'QRS-3456', 'status': 'Idle', 'location': 'South Depot', 'last_service': '2024-03-01', 'driver': 'Rico Reyes'},
+            {'id': 'Unit #05', 'type': 'Semi-Trailer', 'make_model': 'Scania R500', 'plate': 'JKL-7890', 'status': 'Active', 'location': 'North Port', 'last_service': '2024-02-28', 'driver': 'Anton Ramos'},
+            {'id': 'Unit #06', 'type': 'Box Truck', 'make_model': 'Isuzu Elf', 'plate': 'DEF-1122', 'status': 'Active', 'location': 'Cebu Terminal', 'last_service': '2024-02-10', 'driver': 'Santi Go'},
+            {'id': 'Unit #07', 'type': 'Semi-Trailer', 'make_model': 'Man TGX', 'plate': 'GHI-3344', 'status': 'Maintenance', 'location': 'Davao Hub', 'last_service': '2024-03-15', 'driver': 'Lito Lapid'},
+            {'id': 'Unit #08', 'type': 'Box Truck', 'make_model': 'Fuso Canter', 'plate': 'JKL-5566', 'status': 'Idle', 'location': 'Central Station', 'last_service': '2024-01-15', 'driver': 'Bong Revilla'},
+        ]
+        return context
+
 def system_status(request):
     now = datetime.datetime.now().strftime("%H:%M:%S")
     return render(request, 'partials/status_badge.html', {'time': now})
