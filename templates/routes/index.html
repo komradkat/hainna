@@ -1,0 +1,335 @@
+{% extends base_template %}
+
+{% block title %}Hainna - Routes & Zones{% endblock %}
+
+{% block content %}
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{ activeView: 'routes', addRouteOpen: false, addZoneOpen: false }">
+
+    <!-- Header -->
+    <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">
+        <div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">Logistics</h3>
+            <h2 class="text-3xl font-black text-white tracking-tight">Routes & Zones</h2>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- View Toggle -->
+            <div class="flex items-center gap-2 p-1 bg-white/[0.03] border border-white/10 rounded-xl">
+                <button @click="activeView = 'routes'"
+                        :class="activeView === 'routes' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'"
+                        class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">Routes</button>
+                <button @click="activeView = 'zones'"
+                        :class="activeView === 'zones' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'"
+                        class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">Zones</button>
+            </div>
+
+            <!-- Add Button -->
+            <button @click="activeView === 'routes' ? addRouteOpen = true : addZoneOpen = true"
+                    class="btn btn-circle bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-blue-500/50 hover:text-blue-400 transition-all">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── ROUTES VIEW ── -->
+    <div x-show="activeView === 'routes'" class="flex flex-1 overflow-hidden">
+
+        <!-- Route List -->
+        <div class="w-80 border-r border-white/5 flex flex-col overflow-hidden shrink-0">
+            <!-- Search -->
+            <div class="p-4 border-b border-white/5">
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 opacity-30" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" placeholder="Search routes..." class="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm font-bold text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all">
+                </div>
+            </div>
+
+            <!-- Stats Strip -->
+            <div class="px-4 py-3 border-b border-white/5 flex items-center gap-4">
+                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">{{ route_stats.total }} Routes</span>
+                <div class="w-px h-3 bg-white/10"></div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-white/30">{{ route_stats.active }} Active</span>
+                </div>
+            </div>
+
+            <!-- Route Items -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                {% for route in routes %}
+                <div class="px-4 py-4 border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer group transition-colors">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-0.5">{{ route.id }}</p>
+                            <h4 class="text-sm font-black text-white group-hover:text-blue-400 transition-colors">{{ route.name }}</h4>
+                        </div>
+                        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/10 bg-black/40">
+                            {% if route.status == 'Active' %}
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                            {% elif route.status == 'Inactive' %}
+                                <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                            {% else %}
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
+                            {% endif %}
+                            <span class="text-[8px] font-black uppercase tracking-widest text-white/50">{{ route.status }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 text-[10px] font-bold text-white/30">
+                        <span>{{ route.origin }}</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <span>{{ route.destination }}</span>
+                    </div>
+                    <div class="flex items-center gap-4 mt-2">
+                        <span class="text-[9px] font-bold text-white/20">{{ route.distance }}</span>
+                        <span class="text-[9px] font-bold text-white/20">~{{ route.est_time }}</span>
+                        <span class="text-[9px] font-bold text-blue-500/60 ml-auto">{{ route.active_units }} units</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Map Preview Panel -->
+        <div class="flex-1 relative">
+            <div id="routes-map" class="absolute inset-0"></div>
+            <!-- Overlay Info Card -->
+            <div class="absolute top-6 left-6 z-[1000] bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 min-w-[220px]">
+                <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-3">Route Overview</p>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[11px]">
+                        <span class="font-bold text-white/40">Total Distance</span>
+                        <span class="font-black text-white">{{ route_stats.total_km }}</span>
+                    </div>
+                    <div class="flex justify-between text-[11px]">
+                        <span class="font-bold text-white/40">Active Units</span>
+                        <span class="font-black text-white">{{ route_stats.units_on_route }}</span>
+                    </div>
+                    <div class="flex justify-between text-[11px]">
+                        <span class="font-bold text-white/40">Avg. Trip Time</span>
+                        <span class="font-black text-white">{{ route_stats.avg_time }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── ZONES VIEW ── -->
+    <div x-show="activeView === 'zones'" class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <!-- Zone Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-black/40 border border-white/10 rounded-2xl p-5">
+                <p class="text-[8px] font-black uppercase tracking-widest text-white/30 mb-2">Total Zones</p>
+                <p class="text-3xl font-black text-white">{{ zone_stats.total }}</p>
+            </div>
+            <div class="bg-black/40 border border-white/10 rounded-2xl p-5">
+                <p class="text-[8px] font-black uppercase tracking-widest text-white/30 mb-2">Active Zones</p>
+                <p class="text-3xl font-black text-emerald-400">{{ zone_stats.active }}</p>
+            </div>
+            <div class="bg-black/40 border border-white/10 rounded-2xl p-5">
+                <p class="text-[8px] font-black uppercase tracking-widest text-white/30 mb-2">Units in Zones</p>
+                <p class="text-3xl font-black text-blue-400">{{ zone_stats.units_inside }}</p>
+            </div>
+            <div class="bg-black/40 border border-white/10 rounded-2xl p-5">
+                <p class="text-[8px] font-black uppercase tracking-widest text-white/30 mb-2">Alerts Today</p>
+                <p class="text-3xl font-black text-amber-400">{{ zone_stats.alerts }}</p>
+            </div>
+        </div>
+
+        <!-- Zone Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for zone in zones %}
+            <div class="group bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/40 transition-all duration-500 cursor-pointer">
+                <!-- Zone Color Bar -->
+                <div class="h-2 w-full" style="background: {{ zone.color }}"></div>
+
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">{{ zone.id }}</p>
+                            <h3 class="text-lg font-black text-white group-hover:text-blue-400 transition-colors">{{ zone.name }}</h3>
+                            <p class="text-[10px] font-bold text-white/30 mt-0.5">{{ zone.type }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: {{ zone.color }}20; border: 1px solid {{ zone.color }}40">
+                            {% if zone.type == 'Delivery Hub' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ zone.color }}" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            {% elif zone.type == 'Restricted' %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ zone.color }}" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                            {% else %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ zone.color }}" stroke-width="2.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-[11px] p-2 rounded-lg bg-white/[0.02] border border-white/5">
+                            <span class="font-bold text-white/30">Units Inside</span>
+                            <span class="font-black text-white">{{ zone.units_inside }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[11px] p-2 rounded-lg bg-white/[0.02] border border-white/5">
+                            <span class="font-bold text-white/30">Coverage Radius</span>
+                            <span class="font-black text-white">{{ zone.radius }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[11px] p-2 rounded-lg bg-white/[0.02] border border-white/5">
+                            <span class="font-bold text-white/30">Alert Triggers</span>
+                            <span class="font-black {% if zone.alerts > 0 %}text-amber-400{% else %}text-white{% endif %}">{{ zone.alerts }} today</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                            {% if zone.active %}
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                                <span class="text-[9px] font-black uppercase tracking-widest text-emerald-500/70">Active</span>
+                            {% else %}
+                                <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                                <span class="text-[9px] font-black uppercase tracking-widest text-white/30">Inactive</span>
+                            {% endif %}
+                        </div>
+                        <button class="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-colors flex items-center gap-1.5">
+                            Edit Zone
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Add Route Modal -->
+    <div x-show="addRouteOpen"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="absolute inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
+        <div @click.away="addRouteOpen = false"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-8" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             class="bg-[#0A0B10] border border-white/10 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl">
+            <div class="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-1">New Entry</h3>
+                    <h2 class="text-2xl font-black text-white tracking-tight">Add Route</h2>
+                </div>
+                <button @click="addRouteOpen = false" class="text-white/20 hover:text-white transition-colors">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <form class="p-8 space-y-6" @submit.prevent="addRouteOpen = false">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Route Name</label>
+                    <input type="text" placeholder="e.g. Manila – North Port Express" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Origin</label>
+                        <input type="text" placeholder="e.g. Manila Hub" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Destination</label>
+                        <input type="text" placeholder="e.g. North Port" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Distance (km)</label>
+                        <input type="number" placeholder="e.g. 45" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Est. Travel Time</label>
+                        <input type="text" placeholder="e.g. 1h 30m" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-4">
+                    <button type="button" @click="addRouteOpen = false" class="flex-1 px-6 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
+                    <button type="submit" class="flex-[2] px-6 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Save Route</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Zone Modal -->
+    <div x-show="addZoneOpen"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="absolute inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
+        <div @click.away="addZoneOpen = false"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-8" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             class="bg-[#0A0B10] border border-white/10 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl">
+            <div class="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-1">New Entry</h3>
+                    <h2 class="text-2xl font-black text-white tracking-tight">Add Zone</h2>
+                </div>
+                <button @click="addZoneOpen = false" class="text-white/20 hover:text-white transition-colors">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <form class="p-8 space-y-6" @submit.prevent="addZoneOpen = false">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Zone Name</label>
+                        <input type="text" placeholder="e.g. North Hub Zone" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Zone Type</label>
+                        <select class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                            <option class="bg-[#0A0B10]">Delivery Hub</option>
+                            <option class="bg-[#0A0B10]">Restricted</option>
+                            <option class="bg-[#0A0B10]">Waypoint</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Coverage Radius</label>
+                        <input type="text" placeholder="e.g. 2.5 km" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Zone Color</label>
+                        <input type="color" value="#3b82f6" class="w-full h-[50px] bg-white/5 border border-white/10 rounded-xl px-2 cursor-pointer focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-4">
+                    <button type="button" @click="addZoneOpen = false" class="flex-1 px-6 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
+                    <button type="submit" class="flex-[2] px-6 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Save Zone</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+
+<script>
+(function() {
+    function initRoutesMap() {
+        const el = document.getElementById('routes-map');
+        if (!el) return;
+        if (el._leaflet_id && window.routesMap) { window.routesMap.invalidateSize(); return; }
+        if (el.offsetWidth === 0 || el.offsetHeight === 0) { requestAnimationFrame(initRoutesMap); return; }
+
+        const map = L.map(el, { zoomControl: false, attributionControl: false }).setView([11.24, 124.99], 11);
+        window.routesMap = map;
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 17 }).addTo(map);
+
+        // Sample route polylines
+        const routes = [
+            { points: [[11.24, 125.00], [11.30, 124.90]], color: '#3b82f6' },
+            { points: [[11.15, 124.95], [11.25, 125.05]], color: '#10b981' },
+            { points: [[11.30, 124.90], [11.15, 124.95]], color: '#f59e0b' },
+        ];
+        routes.forEach(r => {
+            L.polyline(r.points, { color: r.color, weight: 3, opacity: 0.8, dashArray: '8 4' }).addTo(map);
+        });
+
+        new ResizeObserver(() => { if (window.routesMap) window.routesMap.invalidateSize(); }).observe(el);
+    }
+    setTimeout(initRoutesMap, 250);
+})();
+</script>
+{% endblock %}

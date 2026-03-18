@@ -31,6 +31,7 @@
               if (path.includes('live-tracking')) this.activeTab = 'tracking';
               else if (path.includes('fleet-vehicles')) this.activeTab = 'fleet';
               else if (path.includes('drivers')) this.activeTab = 'drivers';
+              else if (path.includes('routes')) this.activeTab = 'routes';
               else this.activeTab = 'dashboard';
 
               document.addEventListener('htmx:afterOnLoad', () => {
@@ -38,6 +39,7 @@
                   if (newPath.includes('live-tracking')) this.activeTab = 'tracking';
                   else if (newPath.includes('fleet-vehicles')) this.activeTab = 'fleet';
                   else if (newPath.includes('drivers')) this.activeTab = 'drivers';
+                  else if (newPath.includes('routes')) this.activeTab = 'routes';
                   else this.activeTab = 'dashboard';
               });
           }

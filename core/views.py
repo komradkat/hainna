@@ -80,6 +80,32 @@ class DriversView(HtmxTemplateMixin, TemplateView):
         context['stats'] = {'active': 5, 'off_duty': 2, 'on_leave': 1, 'total': 8}
         return context
 
+class RoutesView(HtmxTemplateMixin, TemplateView):
+    template_name = 'routes/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['routes'] = [
+            {'id': 'RTE-001', 'name': 'Manila – North Port Express', 'origin': 'Manila Hub', 'destination': 'North Port', 'distance': '42 km', 'est_time': '1h 20m', 'status': 'Active', 'active_units': 3},
+            {'id': 'RTE-002', 'name': 'Central – Airport Connector', 'origin': 'Central Station', 'destination': 'Airport Road', 'distance': '18 km', 'est_time': '45m', 'status': 'Active', 'active_units': 2},
+            {'id': 'RTE-003', 'name': 'South Terminal Loop', 'origin': 'South Terminal', 'destination': 'Quezon Service', 'distance': '31 km', 'est_time': '1h 05m', 'status': 'Active', 'active_units': 1},
+            {'id': 'RTE-004', 'name': 'Cebu – Davao Trunk Line', 'origin': 'Cebu Terminal', 'destination': 'Davao Hub', 'distance': '985 km', 'est_time': '18h 00m', 'status': 'Inactive', 'active_units': 0},
+            {'id': 'RTE-005', 'name': 'Depot Supply Run', 'origin': 'South Depot', 'destination': 'Manila Hub', 'distance': '27 km', 'est_time': '50m', 'status': 'Active', 'active_units': 1},
+        ]
+        context['route_stats'] = {
+            'total': 5, 'active': 4,
+            'total_km': '1,103 km', 'units_on_route': 7, 'avg_time': '4h 12m',
+        }
+        context['zones'] = [
+            {'id': 'ZNE-001', 'name': 'Manila Hub Zone', 'type': 'Delivery Hub', 'color': '#3b82f6', 'units_inside': 4, 'radius': '3.0 km', 'alerts': 0, 'active': True},
+            {'id': 'ZNE-002', 'name': 'Airport Restricted Area', 'type': 'Restricted', 'color': '#f43f5e', 'units_inside': 0, 'radius': '1.5 km', 'alerts': 2, 'active': True},
+            {'id': 'ZNE-003', 'name': 'North Port Waypoint', 'type': 'Waypoint', 'color': '#10b981', 'units_inside': 2, 'radius': '0.8 km', 'alerts': 0, 'active': True},
+            {'id': 'ZNE-004', 'name': 'South Depot Zone', 'type': 'Delivery Hub', 'color': '#f59e0b', 'units_inside': 1, 'radius': '2.0 km', 'alerts': 1, 'active': True},
+            {'id': 'ZNE-005', 'name': 'Cebu Terminal Zone', 'type': 'Waypoint', 'color': '#8b5cf6', 'units_inside': 0, 'radius': '1.2 km', 'alerts': 0, 'active': False},
+        ]
+        context['zone_stats'] = {'total': 5, 'active': 4, 'units_inside': 7, 'alerts': 3}
+        return context
+
 def system_status(request):
     now = datetime.datetime.now().strftime("%H:%M:%S")
     return render(request, 'partials/status_badge.html', {'time': now})
