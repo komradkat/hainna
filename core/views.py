@@ -109,3 +109,55 @@ class RoutesView(HtmxTemplateMixin, TemplateView):
 def system_status(request):
     now = datetime.datetime.now().strftime("%H:%M:%S")
     return render(request, 'partials/status_badge.html', {'time': now})
+
+class SchedulesView(HtmxTemplateMixin, TemplateView):
+    template_name = 'schedules/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        import datetime as dt
+        today = dt.date.today()
+        # Build week days starting Monday
+        monday = today - dt.timedelta(days=today.weekday())
+        days = []
+        day_labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        # Sample trips per day index (0=Mon … 6=Sun)
+        sample_trips = {
+            0: [
+                {'unit': 'Unit #05', 'route': 'Manila – North Port', 'time': '06:00 – 08:20', 'status': 'Completed'},
+                {'unit': 'Unit #03', 'route': 'South Terminal Loop', 'time': '14:00 – 15:05', 'status': 'Completed'},
+            ],
+            1: [
+                {'unit': 'Unit #08', 'route': 'Central – Airport', 'time': '07:30 – 08:15', 'status': 'Completed'},
+            ],
+            2: [
+                {'unit': 'Unit #12', 'route': 'Manila – North Port', 'time': '06:00 – 08:20', 'status': 'Ongoing'},
+                {'unit': 'Unit #05', 'route': 'Depot Supply Run', 'time': '10:00 – 10:50', 'status': 'Upcoming'},
+                {'unit': 'Unit #03', 'route': 'Central – Airport', 'time': '15:00 – 15:45', 'status': 'Upcoming'},
+            ],
+            3: [
+                {'unit': 'Unit #08', 'route': 'South Terminal Loop', 'time': '08:00 – 09:05', 'status': 'Upcoming'},
+                {'unit': 'Unit #01', 'route': 'Manila – North Port', 'time': '12:00 – 14:20', 'status': 'Upcoming'},
+            ],
+            4: [
+                {'unit': 'Unit #05', 'route': 'Central – Airport', 'time': '09:00 – 09:45', 'status': 'Upcoming'},
+            ],
+            5: [], 6: [],
+        }
+        for i, label in enumerate(day_labels):
+            d = monday + dt.timedelta(days=i)
+            days.append({'label': label, 'date': str(d.day), 'today': d == today, 'trips': sample_trips.get(i, [])})
+        context['week_days'] = days
+        context['stats'] = {'total': 9, 'ongoing': 1, 'upcoming': 5, 'completed': 3}
+        context['schedules'] = [
+            {'id': 'TRP-001', 'unit': 'Unit #05', 'driver': 'Marco Dela Cruz', 'origin': 'Manila Hub', 'destination': 'North Port', 'departure': '06:00', 'date': 'Mon Mar 18', 'eta': '08:20', 'status': 'Completed'},
+            {'id': 'TRP-002', 'unit': 'Unit #08', 'driver': 'Juan Luna', 'origin': 'Central Station', 'destination': 'Airport Road', 'departure': '07:30', 'date': 'Tue Mar 19', 'eta': '08:15', 'status': 'Completed'},
+            {'id': 'TRP-003', 'unit': 'Unit #03', 'driver': 'Rico Reyes', 'origin': 'South Terminal', 'destination': 'Quezon Service', 'departure': '14:00', 'date': 'Mon Mar 18', 'eta': '15:05', 'status': 'Completed'},
+            {'id': 'TRP-004', 'unit': 'Unit #12', 'driver': 'Elena Santos', 'origin': 'Manila Hub', 'destination': 'North Port', 'departure': '06:00', 'date': 'Wed Mar 20', 'eta': '08:20', 'status': 'Ongoing'},
+            {'id': 'TRP-005', 'unit': 'Unit #05', 'driver': 'Marco Dela Cruz', 'origin': 'South Depot', 'destination': 'Manila Hub', 'departure': '10:00', 'date': 'Wed Mar 20', 'eta': '10:50', 'status': 'Upcoming'},
+            {'id': 'TRP-006', 'unit': 'Unit #03', 'driver': 'Rico Reyes', 'origin': 'Central Station', 'destination': 'Airport Road', 'departure': '15:00', 'date': 'Wed Mar 20', 'eta': '15:45', 'status': 'Upcoming'},
+            {'id': 'TRP-007', 'unit': 'Unit #08', 'driver': 'Juan Luna', 'origin': 'South Terminal', 'destination': 'Quezon Service', 'departure': '08:00', 'date': 'Thu Mar 21', 'eta': '09:05', 'status': 'Upcoming'},
+            {'id': 'TRP-008', 'unit': 'Unit #01', 'driver': 'Lito Lapid', 'origin': 'Manila Hub', 'destination': 'North Port', 'departure': '12:00', 'date': 'Thu Mar 21', 'eta': '14:20', 'status': 'Upcoming'},
+            {'id': 'TRP-009', 'unit': 'Unit #05', 'driver': 'Marco Dela Cruz', 'origin': 'Central Station', 'destination': 'Airport Road', 'departure': '09:00', 'date': 'Fri Mar 22', 'eta': '09:45', 'status': 'Upcoming'},
+        ]
+        return context
