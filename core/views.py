@@ -9,7 +9,7 @@ class HtmxTemplateMixin:
         return context
 
 class DashboardView(HtmxTemplateMixin, TemplateView):
-    template_name = 'dashboard.html'
+    template_name = 'dashboard/index.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -31,7 +31,7 @@ class DashboardView(HtmxTemplateMixin, TemplateView):
         return context
 
 class LiveTrackingView(HtmxTemplateMixin, TemplateView):
-    template_name = 'tracking.html'
+    template_name = 'tracking/index.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -45,7 +45,7 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
         return context
 
 class FleetVehiclesView(HtmxTemplateMixin, TemplateView):
-    template_name = 'fleet_vehicles.html'
+    template_name = 'fleet/index.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -64,4 +64,4 @@ class FleetVehiclesView(HtmxTemplateMixin, TemplateView):
 
 def system_status(request):
     now = datetime.datetime.now().strftime("%H:%M:%S")
-    return render(request, 'partials/status_badge.html', {'time': now})
+    return render(request, 'partials/status_badge.html', {'time': now})  # stays in partials

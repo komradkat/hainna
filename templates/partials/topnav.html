@@ -1,0 +1,57 @@
+{% load static %}
+<header class="navbar bg-base-100 border-b border-white/10 px-6 h-24 z-[1040] shrink-0">
+    <div class="flex-1 gap-6">
+        <!-- Mobile Sidebar Toggle -->
+        <label for="my-drawer-2" class="btn btn-ghost drawer-button lg:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
+        </label>
+        <!-- Branding -->
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-xl shadow-blue-500/20">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
+            <div class="hidden sm:block">
+                <h1 class="text-xl font-black tracking-tighter uppercase text-white leading-tight">ASTRA TRANSPORT</h1>
+                <p class="text-[11px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">HainNa? - Fleet Tracking and Management System</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-none gap-4 items-center">
+        <!-- Clock & System Status -->
+        <div class="hidden lg:flex items-center gap-6 px-4 bg-white/5 rounded-full py-2 border border-white/5">
+            <div id="clock" class="text-sm font-black font-mono tracking-wider text-white opacity-60">00:00:00</div>
+            <div hx-get="{% url 'system_status' %}" hx-trigger="every 10s, load" hx-target="this">
+                <div class="flex items-center gap-2 text-[10px] font-bold opacity-50">
+                    <div class="w-1.5 h-1.5 bg-gray-500 rounded-full"></div>
+                    <span class="tracking-widest uppercase">SYNC</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Bell -->
+        <button class="btn btn-ghost btn-circle btn-sm relative">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+            <span class="badge badge-xs badge-primary indicator-item absolute top-1 right-1 border-0"></span>
+        </button>
+
+        <!-- Profile -->
+        <div class="flex items-center gap-3 ml-2 border-l border-white/10 pl-4">
+            <div class="hidden lg:flex flex-col items-end">
+                <p class="text-sm font-bold text-white leading-tight">{{ request.user.first_name|default:"Jane" }}</p>
+                <p class="text-[10px] text-blue-500/70 font-bold uppercase tracking-widest">System Admin</p>
+            </div>
+            <div class="avatar placeholder">
+                <div class="bg-blue-600/20 text-blue-600 rounded-xl w-10 h-10 border border-blue-500/20 flex items-center justify-center">
+                    <span class="text-xs font-black uppercase">
+                        {% if request.user.first_name and request.user.last_name %}
+                            {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+                        {% else %}
+                            JD
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
