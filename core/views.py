@@ -161,3 +161,53 @@ class SchedulesView(HtmxTemplateMixin, TemplateView):
             {'id': 'TRP-009', 'unit': 'Unit #05', 'driver': 'Marco Dela Cruz', 'origin': 'Central Station', 'destination': 'Airport Road', 'departure': '09:00', 'date': 'Fri Mar 22', 'eta': '09:45', 'status': 'Upcoming'},
         ]
         return context
+
+class ServiceLogsView(HtmxTemplateMixin, TemplateView):
+    template_name = 'service_logs/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logs'] = [
+            {'id': 'SVC-001', 'vehicle': 'Unit #02', 'plate': 'XYZ-5678', 'type': 'Oil Change', 'technician': 'Ben Santos', 'date': 'Mar 15, 2026', 'cost': '3,500', 'status': 'Completed'},
+            {'id': 'SVC-002', 'vehicle': 'Unit #07', 'plate': 'GHI-3344', 'type': 'Brake Service', 'technician': 'Carlo Reyes', 'date': 'Mar 14, 2026', 'cost': '8,200', 'status': 'Completed'},
+            {'id': 'SVC-003', 'vehicle': 'Unit #04', 'plate': 'QRS-3456', 'type': 'Tire Replacement', 'technician': 'Ben Santos', 'date': 'Mar 18, 2026', 'cost': '12,000', 'status': 'Pending'},
+            {'id': 'SVC-004', 'vehicle': 'Unit #01', 'plate': 'ABC-1234', 'type': 'General Inspection', 'technician': 'Rodel Cruz', 'date': 'Mar 10, 2026', 'cost': '1,500', 'status': 'Completed'},
+            {'id': 'SVC-005', 'vehicle': 'Unit #08', 'plate': 'JKL-5566', 'type': 'Oil Change', 'technician': 'Carlo Reyes', 'date': 'Mar 05, 2026', 'cost': '3,500', 'status': 'Completed'},
+            {'id': 'SVC-006', 'vehicle': 'Unit #03', 'plate': 'LMN-9012', 'type': 'Engine Overhaul', 'technician': 'Rodel Cruz', 'date': 'Mar 20, 2026', 'cost': '45,000', 'status': 'Pending'},
+            {'id': 'SVC-007', 'vehicle': 'Unit #05', 'plate': 'JKL-7890', 'type': 'Oil Change', 'technician': 'Ben Santos', 'date': 'Feb 20, 2026', 'cost': '3,500', 'status': 'Overdue'},
+            {'id': 'SVC-008', 'vehicle': 'Unit #06', 'plate': 'DEF-1122', 'type': 'Brake Service', 'technician': 'Carlo Reyes', 'date': 'Feb 15, 2026', 'cost': '7,800', 'status': 'Overdue'},
+        ]
+        context['stats'] = {'completed': 5, 'pending': 2, 'overdue': 2, 'total_cost': '84,500'}
+        return context
+
+class FuelMonitoringView(HtmxTemplateMixin, TemplateView):
+    template_name = 'fuel/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # DOE Oil Price Bulletin — Week of Mar 18, 2026 (reference data, no public API)
+        context['doe_prices'] = {
+            'week': 'Mar 18 – 24, 2026',
+            'types': [
+                {'name': 'Diesel',    'price': '58.35', 'change': -0.50},
+                {'name': 'Unleaded',  'price': '64.80', 'change': 0.00},
+                {'name': 'Premium',   'price': '71.20', 'change': 0.80},
+                {'name': 'Kerosene',  'price': '52.10', 'change': -0.30},
+            ]
+        }
+        context['kpi'] = {
+            'total_liters': '2,841', 'total_cost': '165,769',
+            'avg_efficiency': '6.8', 'top_unit': 'Unit #07',
+            'top_unit_liters': '412', 'budget': '200,000',
+            'budget_remaining': '₱34,231', 'over_budget': False,
+        }
+        context['fuel_logs'] = [
+            {'id': 'FUL-001', 'unit': 'Unit #05', 'driver': 'Marco Dela Cruz', 'fuel_type': 'Diesel', 'liters': 95.0, 'price_per_liter': '58.35', 'total_cost': '5,543', 'odometer': '45,821', 'efficiency': 7.2, 'date': 'Mar 18, 2026'},
+            {'id': 'FUL-002', 'unit': 'Unit #08', 'driver': 'Juan Luna', 'fuel_type': 'Diesel', 'liters': 80.0, 'price_per_liter': '58.35', 'total_cost': '4,668', 'odometer': '22,103', 'efficiency': 6.5, 'date': 'Mar 18, 2026'},
+            {'id': 'FUL-003', 'unit': 'Unit #07', 'driver': 'Lito Lapid', 'fuel_type': 'Diesel', 'liters': 120.0, 'price_per_liter': '58.35', 'total_cost': '7,002', 'odometer': '88,420', 'efficiency': 5.9, 'date': 'Mar 17, 2026'},
+            {'id': 'FUL-004', 'unit': 'Unit #01', 'driver': 'Marco Dela Cruz', 'fuel_type': 'Diesel', 'liters': 100.0, 'price_per_liter': '58.85', 'total_cost': '5,885', 'odometer': '31,200', 'efficiency': 7.8, 'date': 'Mar 16, 2026'},
+            {'id': 'FUL-005', 'unit': 'Unit #03', 'driver': 'Elena Santos', 'fuel_type': 'Diesel', 'liters': 85.0, 'price_per_liter': '58.85', 'total_cost': '5,002', 'odometer': '54,780', 'efficiency': 6.1, 'date': 'Mar 15, 2026'},
+            {'id': 'FUL-006', 'unit': 'Unit #06', 'driver': 'Santi Go', 'fuel_type': 'Unleaded', 'liters': 45.0, 'price_per_liter': '64.80', 'total_cost': '2,916', 'odometer': '18,330', 'efficiency': 9.4, 'date': 'Mar 15, 2026'},
+            {'id': 'FUL-007', 'unit': 'Unit #05', 'driver': 'Marco Dela Cruz', 'fuel_type': 'Diesel', 'liters': 90.0, 'price_per_liter': '58.85', 'total_cost': '5,297', 'odometer': '45,280', 'efficiency': 7.0, 'date': 'Mar 12, 2026'},
+        ]
+        return context

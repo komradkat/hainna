@@ -1,0 +1,183 @@
+{% extends base_template %}
+
+{% block title %}Hainna - Service Logs{% endblock %}
+
+{% block content %}
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{ addOpen: false, filter: '' }">
+
+    <!-- Header -->
+    <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">
+        <div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">Maintenance</h3>
+            <h2 class="text-3xl font-black text-white tracking-tight">Service Logs</h2>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 p-1 bg-white/[0.03] border border-white/10 rounded-xl">
+                <button @click="filter = ''" :class="filter === '' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'"
+                        class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">All</button>
+                <button @click="filter = 'Completed'" :class="filter === 'Completed' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'"
+                        class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">Completed</button>
+                <button @click="filter = 'Pending'" :class="filter === 'Pending' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'"
+                        class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">Pending</button>
+                <button @click="filter = 'Overdue'" :class="filter === 'Overdue' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'"
+                        class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">Overdue</button>
+            </div>
+            <button @click="addOpen = true" class="btn btn-circle bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-blue-500/50 hover:text-blue-400 transition-all">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="px-8 py-3 border-b border-white/5 bg-black/10 flex items-center gap-6 shrink-0">
+        <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ stats.completed }} Completed</span></div>
+        <div class="w-px h-4 bg-white/10"></div>
+        <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ stats.pending }} Pending</span></div>
+        <div class="w-px h-4 bg-white/10"></div>
+        <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-rose-500 rounded-full"></div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ stats.overdue }} Overdue</span></div>
+        <div class="ml-auto text-[10px] font-black uppercase tracking-widest text-white/20">Total Cost This Month: ₱{{ stats.total_cost }}</div>
+    </div>
+
+    <!-- Table -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar">
+        <table class="w-full">
+            <thead class="sticky top-0 z-10">
+                <tr class="bg-black/60 backdrop-blur-md border-b border-white/5">
+                    <th class="text-left px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Log ID</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Vehicle</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Service Type</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Technician</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Date</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Cost</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Status</th>
+                    <th class="px-8 py-4"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/[0.04]">
+                {% for log in logs %}
+                <tr class="hover:bg-white/[0.03] transition-colors group"
+                    x-show="filter === '' || filter === '{{ log.status }}'">
+                    <td class="px-8 py-4">
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-widest">{{ log.id }}</span>
+                    </td>
+                    <td class="px-4 py-4">
+                        <p class="text-sm font-black text-white">{{ log.vehicle }}</p>
+                        <p class="text-[10px] font-bold text-white/30 mt-0.5">{{ log.plate }}</p>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                                {% if log.type == 'Oil Change' %}
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M19 3H5c-1.1 0-2 .9-2 2v3c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path><path d="M3 10h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9z"></path></svg>
+                                {% elif log.type == 'Tire Replacement' %}
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+                                {% elif log.type == 'Brake Service' %}
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                {% else %}
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                {% endif %}
+                            </div>
+                            <span class="text-sm font-bold text-white/70">{{ log.type }}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 text-sm font-bold text-white/60">{{ log.technician }}</td>
+                    <td class="px-4 py-4 text-[11px] font-black text-white">{{ log.date }}</td>
+                    <td class="px-4 py-4 text-[11px] font-black text-emerald-400">₱{{ log.cost }}</td>
+                    <td class="px-4 py-4">
+                        <div class="flex items-center gap-1.5">
+                            {% if log.status == 'Completed' %}
+                                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                                <span class="text-[9px] font-black uppercase tracking-widest text-emerald-400">Completed</span>
+                            {% elif log.status == 'Pending' %}
+                                <div class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
+                                <span class="text-[9px] font-black uppercase tracking-widest text-amber-400">Pending</span>
+                            {% else %}
+                                <div class="w-1.5 h-1.5 bg-rose-500 rounded-full"></div>
+                                <span class="text-[9px] font-black uppercase tracking-widest text-rose-400">Overdue</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="px-8 py-4 text-right">
+                        <button class="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors opacity-0 group-hover:opacity-100">View →</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Log Modal -->
+    <div x-show="addOpen"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="absolute inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
+        <div @click.away="addOpen = false"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-8" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             class="bg-[#0A0B10] border border-white/10 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl">
+            <div class="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-1">New Entry</h3>
+                    <h2 class="text-2xl font-black text-white tracking-tight">Log Service</h2>
+                </div>
+                <button @click="addOpen = false" class="text-white/20 hover:text-white transition-colors">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <form class="p-8 space-y-6" @submit.prevent="addOpen = false">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Vehicle</label>
+                        <input type="text" placeholder="e.g. Unit #05" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Service Type</label>
+                        <select class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                            <option class="bg-[#0A0B10]">Oil Change</option>
+                            <option class="bg-[#0A0B10]">Tire Replacement</option>
+                            <option class="bg-[#0A0B10]">Brake Service</option>
+                            <option class="bg-[#0A0B10]">General Inspection</option>
+                            <option class="bg-[#0A0B10]">Engine Overhaul</option>
+                            <option class="bg-[#0A0B10]">Battery Replacement</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Technician</label>
+                        <input type="text" placeholder="e.g. Juan dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Cost (₱)</label>
+                        <input type="number" placeholder="e.g. 3500" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Service Date</label>
+                        <input type="date" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all [color-scheme:dark]">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Next Service Due</label>
+                        <input type="date" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all [color-scheme:dark]">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Remarks</label>
+                    <textarea rows="2" placeholder="Additional notes..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all resize-none"></textarea>
+                </div>
+                <div class="pt-4 flex gap-4">
+                    <button type="button" @click="addOpen = false" class="flex-1 px-6 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
+                    <button type="submit" class="flex-[2] px-6 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Save Log</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+{% endblock %}

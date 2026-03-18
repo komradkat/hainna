@@ -1,0 +1,190 @@
+{% extends base_template %}
+
+{% block title %}Hainna - Fuel Monitoring{% endblock %}
+
+{% block content %}
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{ addOpen: false }">
+
+    <!-- Header -->
+    <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">
+        <div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">Maintenance</h3>
+            <h2 class="text-3xl font-black text-white tracking-tight">Fuel Monitoring</h2>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="https://www.doe.gov.ph/oil-monitor" target="_blank"
+               class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:border-blue-500/30 transition-all">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                DOE Oil Monitor
+            </a>
+            <button @click="addOpen = true" class="btn btn-circle bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-blue-500/50 hover:text-blue-400 transition-all">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- DOE Price Board -->
+    <div class="px-8 py-4 border-b border-white/5 bg-black/20 shrink-0">
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-[9px] font-black uppercase tracking-widest text-white/30">DOE Reference Prices (Per Liter) — Week of {{ doe_prices.week }}</p>
+            <p class="text-[9px] font-bold text-white/20">Source: Department of Energy PH</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for fuel in doe_prices.types %}
+            <div class="bg-white/[0.03] border border-white/10 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">{{ fuel.name }}</p>
+                    <p class="text-xl font-black text-white">₱{{ fuel.price }}</p>
+                    <p class="text-[9px] font-bold mt-0.5 {% if fuel.change > 0 %}text-rose-400{% elif fuel.change < 0 %}text-emerald-400{% else %}text-white/30{% endif %}">
+                        {% if fuel.change > 0 %}▲ +₱{{ fuel.change }}{% elif fuel.change < 0 %}▼ ₱{{ fuel.change }}{% else %}━ No change{% endif %}
+                    </p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-8 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"></path></svg>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Summary KPI Row -->
+    <div class="px-8 py-4 border-b border-white/5 bg-black/10 shrink-0">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div>
+                <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">Fleet Total This Month</p>
+                <p class="text-2xl font-black text-white">{{ kpi.total_liters }}L</p>
+                <p class="text-[10px] font-bold text-white/30">₱{{ kpi.total_cost }}</p>
+            </div>
+            <div>
+                <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">Avg. Fuel Efficiency</p>
+                <p class="text-2xl font-black text-emerald-400">{{ kpi.avg_efficiency }} km/L</p>
+                <p class="text-[10px] font-bold text-white/30">Fleet average</p>
+            </div>
+            <div>
+                <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">Highest Consumer</p>
+                <p class="text-2xl font-black text-amber-400">{{ kpi.top_unit }}</p>
+                <p class="text-[10px] font-bold text-white/30">{{ kpi.top_unit_liters }}L this month</p>
+            </div>
+            <div>
+                <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">Est. Monthly Budget</p>
+                <p class="text-2xl font-black text-blue-400">₱{{ kpi.budget }}</p>
+                <p class="text-[10px] font-bold {% if kpi.over_budget %}text-rose-400{% else %}text-emerald-400{% endif %}">
+                    {% if kpi.over_budget %}Over budget{% else %}{{ kpi.budget_remaining }} remaining{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fuel Log Table -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar">
+        <table class="w-full">
+            <thead class="sticky top-0 z-10">
+                <tr class="bg-black/60 backdrop-blur-md border-b border-white/5">
+                    <th class="text-left px-8 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Log ID</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Unit / Driver</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Fuel Type</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Liters</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Price/L</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Total Cost</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Odometer</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Efficiency</th>
+                    <th class="text-left px-4 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Date</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/[0.04]">
+                {% for log in fuel_logs %}
+                <tr class="hover:bg-white/[0.03] transition-colors">
+                    <td class="px-8 py-4 text-[10px] font-black text-white/30 uppercase tracking-widest">{{ log.id }}</td>
+                    <td class="px-4 py-4">
+                        <p class="text-sm font-black text-white">{{ log.unit }}</p>
+                        <p class="text-[10px] font-bold text-white/30">{{ log.driver }}</p>
+                    </td>
+                    <td class="px-4 py-4">
+                        <span class="px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest
+                            {% if log.fuel_type == 'Diesel' %}bg-amber-500/10 text-amber-400 border border-amber-500/20
+                            {% else %}bg-blue-500/10 text-blue-400 border border-blue-500/20{% endif %}">
+                            {{ log.fuel_type }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 text-sm font-black text-white">{{ log.liters }}L</td>
+                    <td class="px-4 py-4 text-sm font-black text-white">₱{{ log.price_per_liter }}</td>
+                    <td class="px-4 py-4 text-sm font-black text-emerald-400">₱{{ log.total_cost }}</td>
+                    <td class="px-4 py-4 text-[11px] font-bold text-white/60">{{ log.odometer }} km</td>
+                    <td class="px-4 py-4 text-[11px] font-black {% if log.efficiency >= 7 %}text-emerald-400{% elif log.efficiency >= 5 %}text-amber-400{% else %}text-rose-400{% endif %}">
+                        {{ log.efficiency }} km/L
+                    </td>
+                    <td class="px-4 py-4 text-[11px] font-bold text-white/50">{{ log.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Fuel Log Modal -->
+    <div x-show="addOpen"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="absolute inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
+        <div @click.away="addOpen = false"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-8" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             class="bg-[#0A0B10] border border-white/10 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl">
+            <div class="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-1">New Entry</h3>
+                    <h2 class="text-2xl font-black text-white tracking-tight">Log Fuel Fill-up</h2>
+                </div>
+                <button @click="addOpen = false" class="text-white/20 hover:text-white transition-colors">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <form class="p-8 space-y-6" @submit.prevent="addOpen = false">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Vehicle Unit</label>
+                        <input type="text" placeholder="e.g. Unit #05" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Fuel Type</label>
+                        <select class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                            <option class="bg-[#0A0B10]">Diesel</option>
+                            <option class="bg-[#0A0B10]">Unleaded</option>
+                            <option class="bg-[#0A0B10]">Premium</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Liters</label>
+                        <input type="number" step="0.01" placeholder="e.g. 80.00" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Price per Liter (₱)</label>
+                        <input type="number" step="0.01" placeholder="e.g. 58.35" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Current Odometer (km)</label>
+                        <input type="number" placeholder="e.g. 45821" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Date</label>
+                        <input type="date" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all [color-scheme:dark]">
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-4">
+                    <button type="button" @click="addOpen = false" class="flex-1 px-6 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
+                    <button type="submit" class="flex-[2] px-6 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Save Log</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+{% endblock %}
