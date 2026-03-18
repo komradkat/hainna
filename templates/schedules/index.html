@@ -3,7 +3,7 @@
 {% block title %}Hainna - Schedules{% endblock %}
 
 {% block content %}
-<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{ view: 'week', addOpen: false }">
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{ view: 'week' }">
 
     <!-- Header -->
     <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">
@@ -23,7 +23,7 @@
                         class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">List</button>
             </div>
 
-            <button @click="addOpen = true"
+            <button hx-get="{% url 'add_schedule' %}" hx-target="main" hx-push-url="true"
                     class="btn btn-circle bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-blue-500/50 hover:text-blue-400 transition-all">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
@@ -170,61 +170,7 @@
         </table>
     </div>
 
-    <!-- Add Trip Modal -->
-    <div x-show="addOpen"
-         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-         class="absolute inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
-        <div @click.away="addOpen = false"
-             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-8" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-             class="bg-[#0A0B10] border border-white/10 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl">
-            <div class="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                <div>
-                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-1">New Entry</h3>
-                    <h2 class="text-2xl font-black text-white tracking-tight">Schedule a Trip</h2>
-                </div>
-                <button @click="addOpen = false" class="text-white/20 hover:text-white transition-colors">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-            <form class="p-8 space-y-6" @submit.prevent="addOpen = false">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Vehicle Unit</label>
-                        <input type="text" placeholder="e.g. Unit #05" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Driver</label>
-                        <input type="text" placeholder="Search driver..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Origin</label>
-                        <input type="text" placeholder="e.g. Manila Hub" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Destination</label>
-                        <input type="text" placeholder="e.g. North Port" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Departure Date</label>
-                        <input type="date" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all [color-scheme:dark]">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Departure Time</label>
-                        <input type="time" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all [color-scheme:dark]">
-                    </div>
-                </div>
-                <div class="pt-4 flex gap-4">
-                    <button type="button" @click="addOpen = false" class="flex-1 px-6 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
-                    <button type="submit" class="flex-[2] px-6 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Save Schedule</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <!-- Modal extracted to schedules/form.html -->
 </div>
 
 <style>

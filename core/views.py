@@ -33,6 +33,16 @@ class FleetVehiclesView(HtmxTemplateMixin, TemplateView):
         context['vehicles'] = []
         return context
 
+class AddVehicleView(HtmxTemplateMixin, TemplateView):
+    template_name = 'fleet/form.html'
+    
+    def post(self, request, *args, **kwargs):
+        list_view = FleetVehiclesView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
+
 class DriversView(HtmxTemplateMixin, TemplateView):
     template_name = 'drivers/index.html'
 
@@ -41,6 +51,17 @@ class DriversView(HtmxTemplateMixin, TemplateView):
         context['drivers'] = []
         context['stats'] = {'active': 0, 'off_duty': 0, 'on_leave': 0, 'total': 0}
         return context
+
+class AddDriverView(HtmxTemplateMixin, TemplateView):
+    template_name = 'drivers/form.html'
+    
+    def post(self, request, *args, **kwargs):
+        # Return to drivers list after mock submission
+        list_view = DriversView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
 
 class RoutesView(HtmxTemplateMixin, TemplateView):
     template_name = 'routes/index.html'
@@ -52,6 +73,16 @@ class RoutesView(HtmxTemplateMixin, TemplateView):
         context['zones'] = []
         context['zone_stats'] = {'total': 0, 'active': 0, 'units_inside': 0, 'alerts': 0}
         return context
+
+class AddPersonnelView(HtmxTemplateMixin, TemplateView):
+    template_name = 'personnel/form.html'
+    
+    def post(self, request, *args, **kwargs):
+        list_view = PersonnelView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
 
 def system_status(request):
     now = datetime.datetime.now().strftime("%H:%M:%S")
@@ -75,6 +106,16 @@ class SchedulesView(HtmxTemplateMixin, TemplateView):
         context['schedules'] = []
         return context
 
+class AddScheduleView(HtmxTemplateMixin, TemplateView):
+    template_name = 'schedules/form.html'
+    
+    def post(self, request, *args, **kwargs):
+        list_view = SchedulesView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
+
 class ServiceLogsView(HtmxTemplateMixin, TemplateView):
     template_name = 'service_logs/index.html'
 
@@ -83,6 +124,16 @@ class ServiceLogsView(HtmxTemplateMixin, TemplateView):
         context['logs'] = []
         context['stats'] = {'completed': 0, 'pending': 0, 'overdue': 0, 'total_cost': '0'}
         return context
+
+class AddServiceLogView(HtmxTemplateMixin, TemplateView):
+    template_name = 'service_logs/form.html'
+    
+    def post(self, request, *args, **kwargs):
+        list_view = ServiceLogsView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
 
 class FuelMonitoringView(HtmxTemplateMixin, TemplateView):
     template_name = 'fuel/index.html'
@@ -106,6 +157,16 @@ class FuelMonitoringView(HtmxTemplateMixin, TemplateView):
         }
         context['fuel_logs'] = []
         return context
+
+class AddFuelView(HtmxTemplateMixin, TemplateView):
+    template_name = 'fuel/form.html'
+    
+    def post(self, request, *args, **kwargs):
+        list_view = FuelMonitoringView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
 
 class AnalyticsView(HtmxTemplateMixin, TemplateView):
     template_name = 'analytics/index.html'
