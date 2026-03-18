@@ -148,12 +148,3 @@ class PersonnelView(HtmxTemplateMixin, TemplateView):
         context['personnel'] = []
         context['stats'] = {'total': 0, 'active': 0, 'on_leave': 0, 'departments': 0}
         return context
-
-class UserManagementView(HtmxTemplateMixin, TemplateView):
-    template_name = 'users/index.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['users'] = []
-        context['stats'] = {'total': 0, 'active': 0, 'admins': 0, 'suspended': 0}
-        return context

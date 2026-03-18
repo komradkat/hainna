@@ -1,0 +1,128 @@
+{% extends base_template|default:'base.html' %}
+
+{% block title %}Hainna - Onboard Employee{% endblock %}
+
+{% block content %}
+<div class="h-full overflow-y-auto bg-[#0A0B10] custom-scrollbar p-10">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col items-start gap-4 mb-10">
+            <button hx-get="{% url 'users' %}" hx-target="main" hx-push-url="true" class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white flex items-center gap-2 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Back to Directory
+            </button>
+            <div>
+                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">Employee Records</h3>
+                <h2 class="text-4xl font-black text-white tracking-tight">Onboard New Employee</h2>
+            </div>
+        </div>
+
+        <!-- Master Form Wrapper -->
+        <div class="bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+            <!-- decorative header -->
+            <div class="h-2 w-full bg-gradient-to-r from-blue-600 to-indigo-500"></div>
+            
+            <form class="p-10 space-y-10" hx-post="{% url 'add_user' %}" hx-target="main" hx-push-url="{% url 'users' %}">
+                {% csrf_token %}
+                
+                <!-- Section: Personal Info -->
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">Personal Details</h4>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">First Name</label>
+                            <input type="text" name="first_name" placeholder="e.g. Juan" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Last Name</label>
+                            <input type="text" name="last_name" placeholder="e.g. Dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Email Address</label>
+                            <input type="email" name="email" placeholder="e.g. juan@hainna.ph" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Phone Number</label>
+                            <input type="tel" name="phone_number" placeholder="e.g. 0912 345 6789" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                        <div class="space-y-2 xl:col-span-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Home Address</label>
+                            <input type="text" name="address" placeholder="e.g. 123 Quezon City" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Employment Info -->
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">Employment Records</h4>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Department</label>
+                            <input type="text" name="department" placeholder="e.g. Logistics" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Position / Title</label>
+                            <input type="text" name="position" placeholder="e.g. Senior Driver" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Date of Hire</label>
+                            <input type="date" name="date_of_hire" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Emergency Contact -->
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">Emergency Contact</h4>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Contact Name</label>
+                            <input type="text" name="emergency_contact_name" placeholder="e.g. Maria Dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Contact Number</label>
+                            <input type="tel" name="emergency_contact_number" placeholder="e.g. 0912 345 6789" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: System Access -->
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">System Authorization</h4>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Access Role</label>
+                            <select name="role" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                                <option value="Administrator" class="bg-[#0A0B10]">Administrator</option>
+                                <option value="Fleet Manager" class="bg-[#0A0B10]">Fleet Manager</option>
+                                <option value="Dispatcher" class="bg-[#0A0B10]">Dispatcher</option>
+                                <option value="Maintenance Tech" class="bg-[#0A0B10]">Maintenance Tech</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Initial Status</label>
+                            <select name="status" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                                <option value="Active" class="bg-[#0A0B10]">Active</option>
+                                <option value="Pending Verify" class="bg-[#0A0B10]">Pending Verify</option>
+                                <option value="Suspended" class="bg-[#0A0B10]">Suspended</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-white/10 flex justify-end gap-4">
+                    <button type="button" hx-get="{% url 'users' %}" hx-target="main" hx-push-url="true" class="px-8 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
+                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Create Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+{% endblock %}
