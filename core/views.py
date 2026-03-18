@@ -35,12 +35,12 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Mock markers for vehicles
+        # Mock markers for vehicles with status and metadata
         context['units'] = [
-            {'id': 'Unit #05', 'name': 'Marco Dela Cruz', 'pos': [11.24, 125.00]},
-            {'id': 'Unit #08', 'name': 'Juan Luna', 'pos': [11.30, 124.90]},
-            {'id': 'Unit #12', 'name': 'Elena Santos', 'pos': [11.15, 124.95]},
-            {'id': 'Unit #03', 'name': 'Rico Reyes', 'pos': [11.25, 125.05]},
+            {'id': 'Unit #05', 'name': 'Marco Dela Cruz', 'pos': [11.24, 125.00], 'status': 'Moving', 'speed': '42 km/h', 'battery': '85%'},
+            {'id': 'Unit #08', 'name': 'Juan Luna', 'pos': [11.30, 124.90], 'status': 'Idle', 'speed': '0 km/h', 'battery': '50%'},
+            {'id': 'Unit #12', 'name': 'Elena Santos', 'pos': [11.15, 124.95], 'status': 'Stopped', 'speed': '0 km/h', 'battery': '12%'},
+            {'id': 'Unit #03', 'name': 'Rico Reyes', 'pos': [11.25, 125.05], 'status': 'Offline', 'speed': 'N/A', 'battery': '0%'},
         ]
         return context
 
