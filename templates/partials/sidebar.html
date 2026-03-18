@@ -132,7 +132,9 @@
         <li class="menu-title text-[10px] font-black uppercase tracking-[0.2em] text-base-content/30 mt-6 mb-2">Internal
         </li>
         <li>
-            <a href="#" class="flex items-center gap-3 py-3 rounded-lg group">
+            <a href="{% url 'analytics' %}" hx-get="{% url 'analytics' %}" hx-target="main" hx-push-url="true"
+                :class="{ 'active': activeTab === 'analytics' }" @click="activeTab = 'analytics'"
+                class="flex items-center gap-3 py-3 rounded-lg group">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round"
                     class="opacity-50 group-hover:opacity-100 transition-opacity">
@@ -140,11 +142,13 @@
                     <line x1="12" y1="20" x2="12" y2="4"></line>
                     <line x1="6" y1="20" x2="6" y2="14"></line>
                 </svg>
-                <span class="font-bold text-sm tracking-tight opacity-70">Analytics</span>
+                <span class="font-bold text-sm tracking-tight text-white/70 group-hover:text-white">Analytics</span>
             </a>
         </li>
         <li>
-            <a href="#" class="flex items-center gap-3 py-3 rounded-lg group">
+            <a href="{% url 'personnel' %}" hx-get="{% url 'personnel' %}" hx-target="main" hx-push-url="true"
+                :class="{ 'active': activeTab === 'personnel' }" @click="activeTab = 'personnel'"
+                class="flex items-center gap-3 py-3 rounded-lg group">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round"
                     class="opacity-50 group-hover:opacity-100 transition-opacity">
@@ -153,7 +157,7 @@
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
-                <span class="font-bold text-sm tracking-tight opacity-70">Personnel</span>
+                <span class="font-bold text-sm tracking-tight text-white/70 group-hover:text-white">Personnel</span>
             </a>
         </li>
     </ul>

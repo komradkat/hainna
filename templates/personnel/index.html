@@ -1,0 +1,175 @@
+{% extends base_template %}
+
+{% block title %}Hainna - Personnel{% endblock %}
+
+{% block content %}
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{ addOpen: false, filter: '' }">
+
+    <!-- Header -->
+    <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">
+        <div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">Internal</h3>
+            <h2 class="text-3xl font-black text-white tracking-tight">Personnel</h2>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 p-1 bg-white/[0.03] border border-white/10 rounded-xl">
+                <button @click="filter = ''"
+                        :class="filter === '' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'"
+                        class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">All</button>
+                <button @click="filter = 'Active'"
+                        :class="filter === 'Active' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'"
+                        class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">Active</button>
+                <button @click="filter = 'On Leave'"
+                        :class="filter === 'On Leave' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'text-white/40 hover:text-white'"
+                        class="px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all">On Leave</button>
+            </div>
+            <button @click="addOpen = true" class="btn btn-circle bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-blue-500/50 hover:text-blue-400 transition-all">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Strip -->
+    <div class="px-8 py-3 border-b border-white/5 bg-black/10 flex items-center gap-6 shrink-0">
+        <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-blue-500 rounded-full"></div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ stats.total }} Total Staff</span></div>
+        <div class="w-px h-4 bg-white/10"></div>
+        <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ stats.active }} Active</span></div>
+        <div class="w-px h-4 bg-white/10"></div>
+        <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-amber-500 rounded-full"></div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ stats.on_leave }} On Leave</span></div>
+        <div class="w-px h-4 bg-white/10"></div>
+        <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><span class="text-[10px] font-black uppercase tracking-widest text-white/40">{{ stats.departments }} Departments</span></div>
+    </div>
+
+    <!-- Personnel Grid -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {% for person in personnel %}
+            <div class="group bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-blue-500/40 transition-all duration-500 cursor-pointer"
+                 x-show="filter === '' || filter === '{{ person.status }}'">
+
+                <!-- Top Bar -->
+                <div class="h-1 w-full bg-gradient-to-r {{ person.dept_color }}"></div>
+
+                <div class="p-5">
+                    <!-- Avatar + Name -->
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-white shrink-0 bg-gradient-to-br {{ person.dept_color }}">
+                            {{ person.initials }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-black text-white truncate group-hover:text-blue-400 transition-colors">{{ person.name }}</p>
+                            <p class="text-[9px] font-bold text-white/30 uppercase tracking-widest truncate">{{ person.role }}</p>
+                        </div>
+                        <div class="ml-auto shrink-0">
+                            {% if person.status == 'Active' %}
+                                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                            {% elif person.status == 'On Leave' %}
+                                <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
+                            {% else %}
+                                <div class="w-2 h-2 bg-white/20 rounded-full"></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Info rows -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-[10px] p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                            <span class="font-bold text-white/30">Department</span>
+                            <span class="font-black text-white">{{ person.department }}</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                            <span class="font-bold text-white/30">Contact</span>
+                            <span class="font-black text-white">{{ person.contact }}</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] p-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                            <span class="font-bold text-white/30">Since</span>
+                            <span class="font-black text-white">{{ person.since }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                        <span class="text-[8px] font-black uppercase tracking-widest
+                            {% if person.status == 'Active' %}text-emerald-500/70
+                            {% elif person.status == 'On Leave' %}text-amber-500/70
+                            {% else %}text-white/20{% endif %}">{{ person.status }}</span>
+                        <button class="text-[9px] font-black uppercase tracking-widest text-white/20 hover:text-white transition-colors flex items-center gap-1">
+                            Profile <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Add Personnel Modal -->
+    <div x-show="addOpen"
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="absolute inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
+        <div @click.away="addOpen = false"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95 translate-y-8" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             class="bg-[#0A0B10] border border-white/10 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl">
+            <div class="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <div>
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-1">New Entry</h3>
+                    <h2 class="text-2xl font-black text-white tracking-tight">Add Personnel</h2>
+                </div>
+                <button @click="addOpen = false" class="text-white/20 hover:text-white transition-colors">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <form class="p-8 space-y-6" @submit.prevent="addOpen = false">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">First Name</label>
+                        <input type="text" placeholder="e.g. Juan" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Last Name</label>
+                        <input type="text" placeholder="e.g. Santos" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Role</label>
+                        <input type="text" placeholder="e.g. Dispatcher" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Department</label>
+                        <select class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                            <option class="bg-[#0A0B10]">Operations</option>
+                            <option class="bg-[#0A0B10]">Maintenance</option>
+                            <option class="bg-[#0A0B10]">Logistics</option>
+                            <option class="bg-[#0A0B10]">Administration</option>
+                            <option class="bg-[#0A0B10]">Finance</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Contact Number</label>
+                        <input type="text" placeholder="+63 9XX XXX XXXX" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Start Date</label>
+                        <input type="date" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all [color-scheme:dark]">
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-4">
+                    <button type="button" @click="addOpen = false" class="flex-1 px-6 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
+                    <button type="submit" class="flex-[2] px-6 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Add Personnel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+{% endblock %}

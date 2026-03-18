@@ -1,0 +1,184 @@
+{% extends base_template %}
+
+{% block title %}Hainna - Analytics{% endblock %}
+
+{% block content %}
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]">
+
+    <!-- Header -->
+    <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">
+        <div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">Internal</h3>
+            <h2 class="text-3xl font-black text-white tracking-tight">Analytics</h2>
+        </div>
+        <div class="text-[10px] font-black uppercase tracking-widest text-white/20">March 2026</div>
+    </div>
+
+    <!-- Scrollable Body -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
+
+        <!-- KPI Row -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for kpi in kpis %}
+            <div class="bg-black/40 border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-all">
+                <p class="text-[8px] font-black uppercase tracking-widest text-white/30 mb-3">{{ kpi.label }}</p>
+                <p class="text-3xl font-black text-white mb-1">{{ kpi.value }}</p>
+                <div class="flex items-center gap-1.5 mt-2">
+                    {% if kpi.trend == 'up' %}
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                        <span class="text-[9px] font-black text-emerald-400">{{ kpi.change }} vs last month</span>
+                    {% elif kpi.trend == 'down' %}
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <span class="text-[9px] font-black text-rose-400">{{ kpi.change }} vs last month</span>
+                    {% else %}
+                        <span class="text-[9px] font-black text-white/20">━ No change</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Two-column section: Trips Chart + Fuel Chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Trips Per Day (bar chart via inline SVG) -->
+            <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">Trips Per Day</p>
+                        <p class="text-xl font-black text-white">This Week</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    </div>
+                </div>
+                <div class="flex items-end gap-2 h-32">
+                    {% for bar in trips_chart %}
+                    <div class="flex-1 flex flex-col items-center gap-1">
+                        <span class="text-[9px] font-black text-white/40">{{ bar.count }}</span>
+                        <div class="w-full rounded-t-lg transition-all" style="height: {{ bar.pct }}%; background: linear-gradient(to top, #1d4ed8, #3b82f6); min-height: 4px;"></div>
+                        <span class="text-[8px] font-bold text-white/30">{{ bar.day }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Fuel Cost Trend -->
+            <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">Fuel Cost Trend</p>
+                        <p class="text-xl font-black text-white">Last 6 Months</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M19 3H5c-1.1 0-2 .9-2 2v3c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path><path d="M3 10h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9z"></path></svg>
+                    </div>
+                </div>
+                <div class="flex items-end gap-2 h-32">
+                    {% for bar in fuel_chart %}
+                    <div class="flex-1 flex flex-col items-center gap-1">
+                        <span class="text-[8px] font-black text-white/40">₱{{ bar.label_k }}k</span>
+                        <div class="w-full rounded-t-lg transition-all" style="height: {{ bar.pct }}%; background: linear-gradient(to top, #92400e, #f59e0b); min-height: 4px;"></div>
+                        <span class="text-[8px] font-bold text-white/30">{{ bar.month }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Vehicle Performance Table -->
+        <div class="bg-black/40 border border-white/10 rounded-2xl overflow-hidden">
+            <div class="p-6 border-b border-white/5 flex items-center justify-between">
+                <p class="text-sm font-black text-white">Vehicle Performance — March 2026</p>
+                <p class="text-[9px] font-black uppercase tracking-widest text-white/20">Ranked by Trips</p>
+            </div>
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-white/[0.04]">
+                        <th class="text-left px-6 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Unit</th>
+                        <th class="text-left px-4 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Driver</th>
+                        <th class="text-left px-4 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Trips</th>
+                        <th class="text-left px-4 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Distance</th>
+                        <th class="text-left px-4 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Fuel Used</th>
+                        <th class="text-left px-4 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Efficiency</th>
+                        <th class="text-left px-4 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Utilization</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/[0.04]">
+                    {% for row in vehicle_perf %}
+                    <tr class="hover:bg-white/[0.02] transition-colors">
+                        <td class="px-6 py-3">
+                            <p class="text-[11px] font-black text-white">{{ row.unit }}</p>
+                            <p class="text-[9px] font-bold text-white/30">{{ row.plate }}</p>
+                        </td>
+                        <td class="px-4 py-3 text-[11px] font-bold text-white/60">{{ row.driver }}</td>
+                        <td class="px-4 py-3 text-[11px] font-black text-white">{{ row.trips }}</td>
+                        <td class="px-4 py-3 text-[11px] font-black text-white">{{ row.distance }}</td>
+                        <td class="px-4 py-3 text-[11px] font-black text-amber-400">{{ row.fuel }}L</td>
+                        <td class="px-4 py-3 text-[11px] font-black {% if row.eff >= 7 %}text-emerald-400{% elif row.eff >= 5 %}text-amber-400{% else %}text-rose-400{% endif %}">{{ row.eff }} km/L</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full bg-blue-500" style="width: {{ row.util }}%"></div>
+                                </div>
+                                <span class="text-[9px] font-black text-white/40">{{ row.util }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bottom: Route Popularity + Status Breakdown -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Top Routes -->
+            <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
+                <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-5">Top Routes by Trips</p>
+                <div class="space-y-3">
+                    {% for route in top_routes %}
+                    <div>
+                        <div class="flex justify-between text-[10px] mb-1.5">
+                            <span class="font-black text-white">{{ route.name }}</span>
+                            <span class="font-bold text-white/40">{{ route.trips }} trips</span>
+                        </div>
+                        <div class="h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                            <div class="h-full rounded-full" style="width: {{ route.pct }}%; background: {{ route.color }};"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Trip Status Breakdown -->
+            <div class="bg-black/40 border border-white/10 rounded-2xl p-6">
+                <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-5">Trip Status Breakdown</p>
+                <div class="space-y-4">
+                    {% for status in status_breakdown %}
+                    <div class="flex items-center gap-4">
+                        <div class="w-2 h-2 rounded-full shrink-0" style="background: {{ status.color }}"></div>
+                        <div class="flex-1">
+                            <div class="flex justify-between text-[10px] mb-1">
+                                <span class="font-bold text-white/60">{{ status.label }}</span>
+                                <span class="font-black text-white">{{ status.count }}</span>
+                            </div>
+                            <div class="h-1 bg-white/[0.05] rounded-full overflow-hidden">
+                                <div class="h-full rounded-full" style="width: {{ status.pct }}%; background: {{ status.color }};"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+{% endblock %}

@@ -211,3 +211,73 @@ class FuelMonitoringView(HtmxTemplateMixin, TemplateView):
             {'id': 'FUL-007', 'unit': 'Unit #05', 'driver': 'Marco Dela Cruz', 'fuel_type': 'Diesel', 'liters': 90.0, 'price_per_liter': '58.85', 'total_cost': '5,297', 'odometer': '45,280', 'efficiency': 7.0, 'date': 'Mar 12, 2026'},
         ]
         return context
+
+class AnalyticsView(HtmxTemplateMixin, TemplateView):
+    template_name = 'analytics/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['kpis'] = [
+            {'label': 'Total Trips', 'value': '184', 'change': '+12', 'trend': 'up'},
+            {'label': 'Total Distance', 'value': '9,241 km', 'change': '+8%', 'trend': 'up'},
+            {'label': 'Fuel Cost', 'value': '₱165,769', 'change': '-3%', 'trend': 'down'},
+            {'label': 'Fleet Utilization', 'value': '78%', 'change': '+5%', 'trend': 'up'},
+        ]
+        context['trips_chart'] = [
+            {'day': 'Mon', 'count': 12, 'pct': 67},
+            {'day': 'Tue', 'count': 18, 'pct': 100},
+            {'day': 'Wed', 'count': 15, 'pct': 83},
+            {'day': 'Thu', 'count': 10, 'pct': 56},
+            {'day': 'Fri', 'count': 14, 'pct': 78},
+            {'day': 'Sat', 'count': 6, 'pct': 33},
+            {'day': 'Sun', 'count': 3, 'pct': 17},
+        ]
+        context['fuel_chart'] = [
+            {'month': 'Oct', 'label_k': '148', 'pct': 76},
+            {'month': 'Nov', 'label_k': '162', 'pct': 83},
+            {'month': 'Dec', 'label_k': '195', 'pct': 100},
+            {'month': 'Jan', 'label_k': '171', 'pct': 88},
+            {'month': 'Feb', 'label_k': '158', 'pct': 81},
+            {'month': 'Mar', 'label_k': '166', 'pct': 85},
+        ]
+        context['vehicle_perf'] = [
+            {'unit': 'Unit #12', 'plate': 'MNO-2345', 'driver': 'Elena Santos', 'trips': 28, 'distance': '1,420 km', 'fuel': 198, 'eff': 7.2, 'util': 92},
+            {'unit': 'Unit #05', 'plate': 'JKL-7890', 'driver': 'Marco Dela Cruz', 'trips': 25, 'distance': '1,260 km', 'fuel': 175, 'eff': 7.2, 'util': 84},
+            {'unit': 'Unit #07', 'plate': 'GHI-3344', 'driver': 'Lito Lapid', 'trips': 23, 'distance': '1,840 km', 'fuel': 312, 'eff': 5.9, 'util': 79},
+            {'unit': 'Unit #08', 'plate': 'JKL-5566', 'driver': 'Juan Luna', 'trips': 20, 'distance': '980 km', 'fuel': 151, 'eff': 6.5, 'util': 71},
+            {'unit': 'Unit #03', 'plate': 'LMN-9012', 'driver': 'Rico Reyes', 'trips': 18, 'distance': '870 km', 'fuel': 143, 'eff': 6.1, 'util': 63},
+        ]
+        context['top_routes'] = [
+            {'name': 'Manila – North Port Express', 'trips': 54, 'pct': 100, 'color': '#3b82f6'},
+            {'name': 'Central – Airport Connector', 'trips': 41, 'pct': 76, 'color': '#10b981'},
+            {'name': 'South Terminal Loop', 'trips': 37, 'pct': 69, 'color': '#f59e0b'},
+            {'name': 'Depot Supply Run', 'trips': 29, 'pct': 54, 'color': '#8b5cf6'},
+            {'name': 'Cebu – Davao Trunk Line', 'trips': 7, 'pct': 13, 'color': '#f43f5e'},
+        ]
+        context['status_breakdown'] = [
+            {'label': 'Completed', 'count': 148, 'pct': 80, 'color': '#10b981'},
+            {'label': 'Ongoing', 'count': 12, 'pct': 7, 'color': '#3b82f6'},
+            {'label': 'Upcoming', 'count': 18, 'pct': 10, 'color': '#8b5cf6'},
+            {'label': 'Cancelled', 'count': 6, 'pct': 3, 'color': '#f43f5e'},
+        ]
+        return context
+
+class PersonnelView(HtmxTemplateMixin, TemplateView):
+    template_name = 'personnel/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['personnel'] = [
+            {'name': 'Rafael Mendoza', 'initials': 'RM', 'role': 'Fleet Manager', 'department': 'Operations', 'dept_color': 'from-blue-600 to-blue-800', 'contact': '+63 917 123 4567', 'since': 'Jan 2020', 'status': 'Active'},
+            {'name': 'Carla Santos', 'initials': 'CS', 'role': 'Dispatcher', 'department': 'Operations', 'dept_color': 'from-blue-600 to-blue-800', 'contact': '+63 918 234 5678', 'since': 'Mar 2021', 'status': 'Active'},
+            {'name': 'Ben Reyes', 'initials': 'BR', 'role': 'Lead Technician', 'department': 'Maintenance', 'dept_color': 'from-amber-600 to-amber-800', 'contact': '+63 922 345 6789', 'since': 'Jun 2019', 'status': 'Active'},
+            {'name': 'Ana Cruz', 'initials': 'AC', 'role': 'Logistics Coordinator', 'department': 'Logistics', 'dept_color': 'from-emerald-600 to-emerald-800', 'contact': '+63 926 456 7890', 'since': 'Sep 2022', 'status': 'Active'},
+            {'name': 'Tony Ramos', 'initials': 'TR', 'role': 'Mechanic', 'department': 'Maintenance', 'dept_color': 'from-amber-600 to-amber-800', 'contact': '+63 927 567 8901', 'since': 'Feb 2021', 'status': 'On Leave'},
+            {'name': 'Lena Flores', 'initials': 'LF', 'role': 'Finance Officer', 'department': 'Finance', 'dept_color': 'from-purple-600 to-purple-800', 'contact': '+63 929 678 9012', 'since': 'Apr 2020', 'status': 'Active'},
+            {'name': 'Marco Vega', 'initials': 'MV', 'role': 'Route Planner', 'department': 'Logistics', 'dept_color': 'from-emerald-600 to-emerald-800', 'contact': '+63 931 789 0123', 'since': 'Jul 2023', 'status': 'Active'},
+            {'name': 'Sonia Go', 'initials': 'SG', 'role': 'HR Officer', 'department': 'Administration', 'dept_color': 'from-rose-600 to-rose-800', 'contact': '+63 933 890 1234', 'since': 'Nov 2021', 'status': 'On Leave'},
+            {'name': 'Carlo Reyes', 'initials': 'CR', 'role': 'Mechanic', 'department': 'Maintenance', 'dept_color': 'from-amber-600 to-amber-800', 'contact': '+63 935 901 2345', 'since': 'Aug 2020', 'status': 'Active'},
+            {'name': 'Diana Lim', 'initials': 'DL', 'role': 'Admin Assistant', 'department': 'Administration', 'dept_color': 'from-rose-600 to-rose-800', 'contact': '+63 936 012 3456', 'since': 'Jan 2024', 'status': 'Active'},
+        ]
+        context['stats'] = {'total': 10, 'active': 8, 'on_leave': 2, 'departments': 5}
+        return context

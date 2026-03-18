@@ -35,6 +35,8 @@
               else if (path.includes('schedules')) this.activeTab = 'schedules';
               else if (path.includes('service-logs')) this.activeTab = 'service_logs';
               else if (path.includes('fuel')) this.activeTab = 'fuel';
+              else if (path.includes('analytics')) this.activeTab = 'analytics';
+              else if (path.includes('personnel')) this.activeTab = 'personnel';
               else this.activeTab = 'dashboard';
 
               document.addEventListener('htmx:afterOnLoad', () => {
@@ -46,6 +48,8 @@
                   else if (newPath.includes('schedules')) this.activeTab = 'schedules';
                   else if (newPath.includes('service-logs')) this.activeTab = 'service_logs';
                   else if (newPath.includes('fuel')) this.activeTab = 'fuel';
+                  else if (newPath.includes('analytics')) this.activeTab = 'analytics';
+                  else if (newPath.includes('personnel')) this.activeTab = 'personnel';
                   else this.activeTab = 'dashboard';
               });
           }
