@@ -98,24 +98,6 @@ class AddScheduleView(HtmxTemplateMixin, TemplateView):
         list_view.args = args
         return list_view.get(request, *args, **kwargs)
 
-class ServiceLogsView(HtmxTemplateMixin, TemplateView):
-    template_name = 'service_logs/index.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['logs'] = []
-        context['stats'] = {'completed': 0, 'pending': 0, 'overdue': 0, 'total_cost': '0'}
-        return context
-
-class AddServiceLogView(HtmxTemplateMixin, TemplateView):
-    template_name = 'service_logs/form.html'
-    
-    def post(self, request, *args, **kwargs):
-        list_view = ServiceLogsView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
 
 class FuelMonitoringView(HtmxTemplateMixin, TemplateView):
     template_name = 'fuel/index.html'

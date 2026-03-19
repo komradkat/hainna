@@ -53,3 +53,33 @@ class Vehicle(models.Model):
         elif self.status == 'Maintenance':
             return 'text-amber-500/70 border-amber-500/20 bg-amber-500/10'
         return 'text-rose-500/70 border-rose-500/20 bg-rose-500/10'
+
+class MaintenanceLog(models.Model):
+    SERVICE_TYPES = [
+        ('Preventive', 'Preventive Maintenance'),
+        ('Repair', 'Repair'),
+        ('Inspection', 'Inspection'),
+        ('Cleaning', 'Cleaning'),
+    ]
+    STATUS_CHOICES = [
+        ('Scheduled', 'Scheduled'),
+        ('In Progress', 'In Progress'),
+        ('Completed', 'Completed'),
+        ('Cancelled', 'Cancelled'),
+    ]
+
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='maintenance_logs')
+    driver = models.ForeignKey(Driver, on_delete=models.SET_NULL, null=True, blank=True, related_name='reported_maintenance')
+    service_type = models.CharField(max_length=50, choices=SERVICE_TYPES)
+    description = models.TextField()
+    date = models.DateField()
+    odometer_reading = models.IntegerField(null=True, blank=True)
+    cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Scheduled')
+    performed_by = models.CharField(max_length=100, blank=True)
+
+    date_added = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.service_type} - {self.vehicle.plate_number} ({self.date})"

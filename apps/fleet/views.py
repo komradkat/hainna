@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, View
 from core.views import HtmxTemplateMixin
-from .models import Vehicle, Driver
-from .forms import VehicleForm, DriverForm
+from .models import Vehicle, Driver, MaintenanceLog
+from .forms import VehicleForm, DriverForm, ServiceLogForm
 
 class FleetVehiclesView(HtmxTemplateMixin, TemplateView):
     template_name = 'fleet/index.html'
@@ -151,6 +151,86 @@ class DeleteDriverView(View):
         driver.delete()
         
         list_view = DriversView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
+
+class ServiceLogsView(HtmxTemplateMixin, TemplateView):
+    template_name = 'service_logs/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logs'] = MaintenanceLog.objects.all().order_by('-date')
+        from django.db.models import Sum
+        context['stats'] = {
+            'total_cost': MaintenanceLog.objects.aggregate(Sum('cost'))['cost__sum'] or 0,
+            'scheduled': MaintenanceLog.objects.filter(status='Scheduled').count(),
+            'in_progress': MaintenanceLog.objects.filter(status='In Progress').count(),
+            'completed': MaintenanceLog.objects.filter(status='Completed').count(),
+        }
+        return context
+
+class AddServiceLogView(HtmxTemplateMixin, TemplateView):
+    template_name = 'service_logs/form.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = ServiceLogForm()
+        context['is_edit'] = False
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = ServiceLogForm(request.POST)
+        if form.is_valid():
+            form.save()
+            list_view = ServiceLogsView()
+            list_view.request = request
+            list_view.kwargs = kwargs
+            list_view.args = args
+            return list_view.get(request, *args, **kwargs)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'is_edit': False,
+            'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+        })
+
+class EditServiceLogView(HtmxTemplateMixin, TemplateView):
+    template_name = 'service_logs/form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        log = get_object_or_404(MaintenanceLog, pk=self.kwargs.get('pk'))
+        context['form'] = ServiceLogForm(instance=log)
+        context['is_edit'] = True
+        context['log'] = log
+        return context
+
+    def post(self, request, *args, **kwargs):
+        log = get_object_or_404(MaintenanceLog, pk=self.kwargs.get('pk'))
+        form = ServiceLogForm(request.POST, instance=log)
+        if form.is_valid():
+            form.save()
+            list_view = ServiceLogsView()
+            list_view.request = request
+            list_view.kwargs = kwargs
+            list_view.args = args
+            return list_view.get(request, *args, **kwargs)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'is_edit': True,
+            'log': log,
+            'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+        })
+
+class DeleteServiceLogView(View):
+    def delete(self, request, *args, **kwargs):
+        log = get_object_or_404(MaintenanceLog, pk=self.kwargs.get('pk'))
+        log.delete()
+        
+        list_view = ServiceLogsView()
         list_view.request = request
         list_view.kwargs = kwargs
         list_view.args = args

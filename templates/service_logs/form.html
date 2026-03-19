@@ -11,15 +11,15 @@
                 Back to Directory
             </button>
             <div>
-                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">New Entry</h3>
-                <h2 class="text-4xl font-black text-white tracking-tight">Log Service</h2>
+                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">{% if is_edit %}Update Info{% else %}New Entry{% endif %}</h3>
+                <h2 class="text-4xl font-black text-white tracking-tight">{% if is_edit %}Edit Service Log{% else %}Log Service{% endif %}</h2>
             </div>
         </div>
 
         <div class="bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
             <div class="h-2 w-full bg-gradient-to-r from-blue-600 to-indigo-500"></div>
             
-            <form class="p-10 space-y-10" hx-post="{% url 'add_service_log' %}" hx-target="main" hx-push-url="{% url 'service_logs' %}">
+            <form class="p-10 space-y-10" {% if is_edit %}hx-post="{% url 'edit_service_log' log.pk %}"{% else %}hx-post="{% url 'add_service_log' %}"{% endif %} hx-target="main" hx-push-url="{% url 'service_logs' %}">
                 {% csrf_token %}
                 
                 <div>
@@ -28,50 +28,64 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Vehicle</label>
-                                <input type="text" placeholder="e.g. Unit #05" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                                <select name="vehicle" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer" required>
+                                    <option value="" class="bg-[#0A0B10]">-- Select Vehicle --</option>
+                                    {% for vehicle in form.vehicle.field.queryset %}
+                                        <option value="{{ vehicle.pk }}" class="bg-[#0A0B10]" {% if form.vehicle.value|stringformat:"s" == vehicle.pk|stringformat:"s" %}selected{% endif %}>{{ vehicle }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Driver (Optional)</label>
+                                <select name="driver" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                                    <option value="" class="bg-[#0A0B10]">-- Select Driver --</option>
+                                    {% for driver in form.driver.field.queryset %}
+                                        <option value="{{ driver.pk }}" class="bg-[#0A0B10]" {% if form.driver.value|stringformat:"s" == driver.pk|stringformat:"s" %}selected{% endif %}>{{ driver }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Service Type</label>
-                                <select class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
-                                    <option class="bg-[#0A0B10]">Oil Change</option>
-                                    <option class="bg-[#0A0B10]">Tire Replacement</option>
-                                    <option class="bg-[#0A0B10]">Brake Service</option>
-                                    <option class="bg-[#0A0B10]">General Inspection</option>
-                                    <option class="bg-[#0A0B10]">Engine Overhaul</option>
-                                    <option class="bg-[#0A0B10]">Battery Replacement</option>
+                                <select name="service_type" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer" required>
+                                    {% for choice_val, choice_label in form.fields.service_type.choices %}
+                                        <option value="{{ choice_val }}" class="bg-[#0A0B10]" {% if form.service_type.value == choice_val %}selected{% endif %}>{{ choice_label }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Technician</label>
-                                <input type="text" placeholder="e.g. Juan dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Status</label>
+                                <select name="status" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer" required>
+                                    {% for choice_val, choice_label in form.fields.status.choices %}
+                                        <option value="{{ choice_val }}" class="bg-[#0A0B10]" {% if form.status.value == choice_val %}selected{% endif %}>{{ choice_label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Technician / Shop</label>
+                                <input type="text" name="performed_by" value="{{ form.performed_by.value|default_if_none:'' }}" placeholder="e.g. Juan dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Cost (₱)</label>
-                                <input type="number" placeholder="e.g. 3500" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                                <input type="number" step="0.01" name="cost" value="{{ form.cost.value|default_if_none:'0.00' }}" placeholder="e.g. 3500" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                             </div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Service Date</label>
-                                <input type="date" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all [color-scheme:dark]">
+                                <input type="date" name="date" value="{{ form.date.value|date:'Y-m-d'|default_if_none:'' }}" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all [color-scheme:dark]">
                             </div>
                             <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Next Service Due</label>
-                                <input type="date" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all [color-scheme:dark]">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Odometer Reading</label>
+                                <input type="number" name="odometer_reading" value="{{ form.odometer_reading.value|default_if_none:'' }}" placeholder="e.g. 150000" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                             </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Remarks</label>
-                            <textarea rows="2" placeholder="Additional notes..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all resize-none"></textarea>
-                        </div>
+                            <div class="space-y-2 lg:col-span-2">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Remarks</label>
+                                <textarea name="description" rows="2" placeholder="Additional notes..." required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all resize-none">{{ form.description.value|default_if_none:'' }}</textarea>
+                            </div>
                     </div>
                 </div>
 
                 <div class="pt-6 border-t border-white/10 flex justify-end gap-4">
                     <button type="button" hx-get="{% url 'service_logs' %}" hx-target="main" hx-push-url="true" class="px-8 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
-                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Save Log</button>
+                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">{% if is_edit %}Save Changes{% else %}Save Log{% endif %}</button>
                 </div>
             </form>
         </div>

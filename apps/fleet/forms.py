@@ -1,5 +1,5 @@
 from django import forms
-from .models import Vehicle, Driver
+from .models import Vehicle, Driver, MaintenanceLog
 
 class VehicleForm(forms.ModelForm):
     class Meta:
@@ -12,4 +12,13 @@ class DriverForm(forms.ModelForm):
         fields = ['user', 'first_name', 'last_name', 'license_number', 'license_expiry', 'contact_number', 'status', 'rating']
         widgets = {
             'license_expiry': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class ServiceLogForm(forms.ModelForm):
+    class Meta:
+        model = MaintenanceLog
+        fields = ['vehicle', 'driver', 'service_type', 'description', 'date', 'odometer_reading', 'cost', 'status', 'performed_by']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 3}),
         }
