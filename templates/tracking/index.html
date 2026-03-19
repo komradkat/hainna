@@ -252,10 +252,10 @@
         <div class="p-6 border-t border-white/5 bg-white/[0.01]">
             <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
                 <div class="flex items-center gap-2">
-                    <span class="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></span>
-                    <span>System Sync</span>
+                    <span id="traccar-dot" class="w-1 h-1 rounded-full animate-pulse {% if traccar_ok %}bg-emerald-500{% else %}bg-rose-500{% endif %}"></span>
+                    <span id="traccar-label">{% if traccar_ok %}Traccar Live{% else %}Traccar Offline{% endif %}</span>
                 </div>
-                <span>REL 4.0</span>
+                <span>GPS SYNC</span>
             </div>
         </div>
     </div>
@@ -464,8 +464,77 @@
             L.tileLayer(url, { maxZoom: 17 }).addTo(window.mapTracking);
         };
 
+        // ── Live Polling (every 5s) ──────────────────────────────────────────
+        const POSITIONS_URL = "{{ traccar_url|safe }}";
+        
+        function getMarkerColor(status) {
+            switch(status) {
+                case 'Moving': return '#10b981';
+                case 'Idle': return '#f59e0b';
+                case 'Stopped': return '#f43f5e';
+                default: return '#6b7280';
+            }
+        }
+
+        function buildIcon(status) {
+            const color = getMarkerColor(status);
+            const isMoving = status === 'Moving';
+            return L.divIcon({
+                className: 'tracking-marker',
+                html: `<div class="relative flex items-center justify-center">
+                    <div class="absolute w-6 h-6 rounded-full opacity-40 ${isMoving ? 'animate-ping' : ''}" style="background-color: ${color}"></div>
+                    <div class="relative w-4 h-4 rounded-full border-2 border-white/50 shadow-xl" style="background-color: ${color}"></div>
+                </div>`,
+                iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12]
+            });
+        }
+
+        function pollPositions() {
+            fetch(POSITIONS_URL, {credentials: 'same-origin'})
+                .then(r => r.json())
+                .then(data => {
+                    // Update Traccar status badge
+                    const dot = document.getElementById('traccar-dot');
+                    const label = document.getElementById('traccar-label');
+                    if (dot && label) {
+                        if (data.traccar_ok) {
+                            dot.className = 'w-1 h-1 rounded-full animate-pulse bg-emerald-500';
+                            label.textContent = 'Traccar Live';
+                        } else {
+                            dot.className = 'w-1 h-1 rounded-full animate-pulse bg-rose-500';
+                            label.textContent = 'Traccar Offline';
+                        }
+                    }
+
+                    if (!window.markerMap || !window.mapTracking) return;
+
+                    data.units.forEach(u => {
+                        const newLatLng = [u.lat, u.lng];
+                        if (window.markerMap[u.id]) {
+                            // Smoothly update existing marker
+                            window.markerMap[u.id].setLatLng(newLatLng);
+                            window.markerMap[u.id].setIcon(buildIcon(u.status));
+                        } else {
+                            // New device appeared — add marker
+                            const popup = `<div class="p-2 min-w-[160px]"><p class="text-xs font-black text-white">${u.id}</p><p class="text-[10px] text-white/50">${u.name}</p><p class="text-[10px] text-white/50 mt-1">${u.speed_display} · ${u.status}</p></div>`;
+                            const m = L.marker(newLatLng, {icon: buildIcon(u.status)}).addTo(window.mapTracking).bindPopup(popup);
+                            window.markerMap[u.id] = m;
+                        }
+                    });
+                })
+                .catch(() => {
+                    const dot = document.getElementById('traccar-dot');
+                    if (dot) dot.className = 'w-1 h-1 rounded-full animate-pulse bg-rose-500';
+                });
+        }
+
         // Initial launch with a safety delay for HTMX settle
         setTimeout(initMap, 250);
+        // Start polling loop
+        setTimeout(() => {
+            pollPositions();
+            setInterval(pollPositions, 5000);
+        }, 3000);
     })();
 </script>
 {% endblock %}

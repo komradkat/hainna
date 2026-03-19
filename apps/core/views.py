@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 import datetime
 
 class HtmxTemplateMixin(LoginRequiredMixin):
@@ -29,17 +30,97 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
     template_name = 'tracking/index.html'
 
     def get_context_data(self, **kwargs):
+        from fleet.models import Vehicle
+        from fleet import traccar
+        
         context = super().get_context_data(**kwargs)
-        context['units'] = []
+        
+        # Pull live positions from Traccar (graceful fallback to empty)
+        positions = traccar.get_all_positions()
+        traccar_ok = traccar.is_connected()
+        
+        vehicles = Vehicle.objects.filter(
+            traccar_device_id__isnull=False
+        ).exclude(traccar_device_id='').select_related('driver')
+        
+        units = []
+        for v in vehicles:
+            pos_data = positions.get(str(v.traccar_device_id), {})
+            lat = pos_data.get('lat')
+            lng = pos_data.get('lng')
+            speed = pos_data.get('speed', 0)
+            
+            if speed > 5:
+                status = 'Moving'
+            elif speed > 0:
+                status = 'Idle'
+            else:
+                status = 'Stopped'
+                
+            driver_name = str(v.driver) if v.driver else 'Unassigned'
+            
+            units.append({
+                'id': v.plate_number,
+                'vehicle_id': v.id,
+                'name': driver_name,
+                'plate': v.plate_number,
+                'status': status if lat else 'Offline',
+                'speed': f"{speed:.1f} km/h" if lat else 'N/A',
+                'lat': lat,
+                'lng': lng,
+                'pos': f"[{lat}, {lng}]" if lat else '[0, 0]',
+                'battery': 'N/A',
+                'has_gps': bool(lat),
+            })
+        
+        context['units'] = units
+        context['traccar_ok'] = traccar_ok
+        context['traccar_url'] = self.request.build_absolute_uri('/live-tracking/positions/')
         return context
 
 
-
-
-
-
 @login_required
-from django.contrib.auth.decorators import login_required
+def tracking_positions(request):
+    """JSON endpoint polled by the live map every 5s to update vehicle positions."""
+    from fleet.models import Vehicle
+    from fleet import traccar
+    
+    positions = traccar.get_all_positions()
+    traccar_ok = traccar.is_connected()
+    
+    vehicles = Vehicle.objects.filter(
+        traccar_device_id__isnull=False
+    ).exclude(traccar_device_id='').select_related('driver')
+    
+    units = []
+    for v in vehicles:
+        pos_data = positions.get(str(v.traccar_device_id), {})
+        lat = pos_data.get('lat')
+        lng = pos_data.get('lng')
+        speed = pos_data.get('speed', 0)
+        
+        if not lat:
+            continue  # Skip vehicles with no GPS fix
+        
+        if speed > 5:
+            status = 'Moving'
+        elif speed > 0:
+            status = 'Idle'
+        else:
+            status = 'Stopped'
+            
+        units.append({
+            'id': v.plate_number,
+            'name': str(v.driver) if v.driver else 'Unassigned',
+            'status': status,
+            'speed': round(speed, 1),
+            'speed_display': f"{speed:.1f} km/h",
+            'lat': lat,
+            'lng': lng,
+        })
+    
+    return JsonResponse({'units': units, 'traccar_ok': traccar_ok})
+
 
 @login_required
 def system_status(request):

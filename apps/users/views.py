@@ -1,5 +1,6 @@
 from django.views.generic import TemplateView, View
 from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 from core.views import HtmxTemplateMixin, DashboardView

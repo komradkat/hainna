@@ -278,4 +278,10 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
+
+# Traccar GPS Integration
+TRACCAR_URL = env('TRACCAR_URL', default='http://localhost:8082')
+TRACCAR_USER = env('TRACCAR_USER', default='admin')
+TRACCAR_PASSWORD = env('TRACCAR_PASSWORD', default='admin')
+
 LOGOUT_REDIRECT_URL = 'login'

@@ -39,6 +39,7 @@ class Vehicle(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
     mileage = models.IntegerField(default=0)
     capacity = models.CharField(max_length=50, blank=True, null=True)
+    traccar_device_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="Traccar Device ID", help_text="The unique identifier of this vehicle's GPS tracker device in Traccar")
     
     date_added = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)

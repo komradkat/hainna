@@ -4,7 +4,7 @@ from .models import Vehicle, Driver, MaintenanceLog, Route, Zone
 class VehicleForm(forms.ModelForm):
     class Meta:
         model = Vehicle
-        fields = ['plate_number', 'make', 'model', 'year', 'vin', 'status', 'mileage', 'capacity']
+        fields = ['plate_number', 'make', 'model', 'year', 'vin', 'status', 'mileage', 'capacity', 'traccar_device_id']
 
 class DriverForm(forms.ModelForm):
     class Meta:

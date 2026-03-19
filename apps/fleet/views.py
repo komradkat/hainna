@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, View
+from django.contrib.auth.mixins import LoginRequiredMixin
 from core.views import HtmxTemplateMixin
 from .models import Vehicle, Driver, MaintenanceLog, Route, Zone
 from .forms import VehicleForm, DriverForm, ServiceLogForm, RouteForm, ZoneForm
