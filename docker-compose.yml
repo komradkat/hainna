@@ -4,11 +4,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=hainna
-      - POSTGRES_USER=hainna_user
-      - POSTGRES_PASSWORD=hainna_password
+      - POSTGRES_DB=${POSTGRES_DB:-hainna}
+      - POSTGRES_USER=${POSTGRES_USER:-hainna_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-hainna_password}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hainna_user -d hainna"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hainna_user} -d ${POSTGRES_DB:-hainna}"]
       interval: 5s
       timeout: 5s
       retries: 5
