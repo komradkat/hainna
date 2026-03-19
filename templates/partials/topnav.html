@@ -36,22 +36,32 @@
         </button>
 
         <!-- Profile -->
-        <div class="flex items-center gap-3 ml-2 border-l border-white/10 pl-4">
-            <div class="hidden lg:flex flex-col items-end">
-                <p class="text-sm font-bold text-white leading-tight">{{ request.user.first_name|default:"Jane" }}</p>
-                <p class="text-[10px] text-blue-500/70 font-bold uppercase tracking-widest">System Admin</p>
+        <div class="flex items-center gap-3 ml-2 border-l border-white/10 pl-4 dropdown dropdown-end">
+            <div class="hidden lg:flex flex-col items-end cursor-pointer" tabindex="0" role="button">
+                <p class="text-sm font-bold text-white leading-tight">{{ request.user.first_name|default:request.user.username }}</p>
+                <p class="text-[10px] text-blue-500/70 font-bold uppercase tracking-widest">{{ request.user.role|default:"User" }}</p>
             </div>
-            <div class="avatar placeholder">
-                <div class="bg-blue-600/20 text-blue-600 rounded-xl w-10 h-10 border border-blue-500/20 flex items-center justify-center">
+            <div tabindex="0" role="button" class="avatar placeholder cursor-pointer">
+                <div class="bg-blue-600/20 text-blue-600 rounded-xl w-10 h-10 border border-blue-500/20 flex items-center justify-center hover:bg-blue-600/30 transition-colors">
                     <span class="text-xs font-black uppercase">
                         {% if request.user.first_name and request.user.last_name %}
                             {{ request.user.first_name|first }}{{ request.user.last_name|first }}
                         {% else %}
-                            JD
+                            {{ request.user.username|first|default:"JD" }}
                         {% endif %}
                     </span>
                 </div>
             </div>
+            <ul tabindex="0" class="dropdown-content menu bg-black/95 backdrop-blur-xl border border-white/10 rounded-2xl z-[1] w-52 p-2 shadow-2xl mt-4">
+                <li class="menu-title text-[9px] font-black uppercase tracking-widest text-white/30 px-4 py-2">Settings</li>
+                <li><a href="{% url 'change_password' %}" class="text-xs font-bold text-white hover:bg-white/5 rounded-lg py-3">Change Password</a></li>
+                <li class="mt-2 border-t border-white/5 pt-2">
+                    <form action="{% url 'logout' %}" method="post" class="w-full p-0 flex">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-left text-xs font-bold text-red-500 hover:bg-red-500/10 rounded-lg px-4 py-3 flex-1">Logout Control Session</button>
+                    </form>
+                </li>
+            </ul>
         </div>
     </div>
 </header>

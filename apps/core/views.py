@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 import datetime
 
-class HtmxTemplateMixin:
+class HtmxTemplateMixin(LoginRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['base_template'] = 'partial_base.html' if self.request.headers.get('HX-Request') else 'base.html'
@@ -36,6 +38,7 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
 
 
 
+@login_required
 def system_status(request):
     now = datetime.datetime.now().strftime("%H:%M:%S")
     return render(request, 'partials/status_badge.html', {'time': now})

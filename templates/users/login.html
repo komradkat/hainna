@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Hainna Admin Console</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-black min-h-screen flex items-center justify-center p-6 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-black to-black">
+
+    <div class="w-full max-w-[420px] bg-black/40 backdrop-blur-3xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-500"></div>
+        
+        <div class="p-10 text-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-500/20 mx-auto mb-6">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
+            
+            <h1 class="text-3xl font-black tracking-tighter uppercase text-white mb-2">ASTRA TRANSPORT</h1>
+            <p class="text-[11px] font-bold text-blue-500 uppercase tracking-widest mb-10">HainNa? - System Authentication</p>
+            
+            {% if form.errors %}
+                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-8 text-left relative overflow-hidden group">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
+                    <p class="text-xs font-bold text-red-400 pl-2">Invalid username or password.</p>
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}" class="space-y-6 text-left">
+                {% csrf_token %}
+                
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Personnel ID (Username)</label>
+                    <input type="text" name="username" placeholder="Enter your username" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required autofocus>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Passcode</label>
+                    <input type="password" name="password" placeholder="••••••••" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit" class="w-full py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all relative group overflow-hidden">
+                        <span class="relative z-10">Secure Login</span>
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 pointer-events-none"></div>
+                    </button>
+                </div>
+                
+                <input type="hidden" name="next" value="{{ next|default:'' }}">
+            </form>
+            
+        </div>
+        
+        <div class="border-t border-white/5 bg-white/[0.02] p-6 text-center">
+            <p class="text-[9px] font-bold text-white/20 uppercase tracking-widest">&copy; 2026 Astra Transport Systems. Authorized Access Only.</p>
+        </div>
+    </div>
+    
+</body>
+</html>
