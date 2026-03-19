@@ -36,7 +36,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 PRODUCTION = env('PRODUCTION', default=False)
 
-ALLOWED_HOSTS = [h.strip() for h in env('ALLOWED_HOSTS', default='localhost').split(',') if h.strip()]
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost'])
 
 # ── Applications ─────────────────────────────────────────────────────────────
 
