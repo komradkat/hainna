@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only dependency files first to leverage Docker cache
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock* ./
 
 # Install dependencies into the system site-packages (no venv needed in container)
 RUN uv sync --frozen --no-cache --no-dev
@@ -41,7 +41,7 @@ ENV USE_X_FORWARDED_HOST=True
 
 # Collect static files (requires standard dummy env vars if they aren't provided)
 # Note: In a real deploy, you'd provide real env vars or skip this until runtime.
-RUN SECRET_KEY=build-time-only-key uv run python manage.py collectstatic --no-input
+# RUN SECRET_KEY=build-time-only-key uv run python manage.py collectstatic --no-input
 
 # Expose port
 EXPOSE 8000

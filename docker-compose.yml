@@ -13,7 +13,7 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
+  hainna:
     build: .
     volumes:
       - .:/app

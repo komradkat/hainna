@@ -20,9 +20,6 @@ staticfiles/
 media/
 logs/
 
-# UV
-uv.lock
-
 # Docker
 Dockerfile
 docker-compose.yml
