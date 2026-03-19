@@ -16,9 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import DashboardView, LiveTrackingView, DriversView, AddDriverView, RoutesView, AddRouteView, AddZoneView, SchedulesView, AddScheduleView, ServiceLogsView, AddServiceLogView, FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, AddPersonnelView, system_status
+from .views import DashboardView, LiveTrackingView, RoutesView, AddRouteView, AddZoneView, SchedulesView, AddScheduleView, ServiceLogsView, AddServiceLogView, FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, AddPersonnelView, system_status
 from users.views import UserManagementView, AddUserView, EditUserView, DeleteUserView, ChangePasswordView
-from fleet.views import FleetVehiclesView, AddVehicleView, EditVehicleView, DeleteVehicleView
+from fleet.views import FleetVehiclesView, AddVehicleView, EditVehicleView, DeleteVehicleView, DriversView, AddDriverView, EditDriverView, DeleteDriverView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +30,8 @@ urlpatterns = [
     path('fleet/vehicles/delete/<int:pk>/', DeleteVehicleView.as_view(), name='delete_vehicle'),
     path('fleet/drivers/', DriversView.as_view(), name='drivers'),
     path('fleet/drivers/add/', AddDriverView.as_view(), name='add_driver'),
+    path('fleet/drivers/edit/<int:pk>/', EditDriverView.as_view(), name='edit_driver'),
+    path('fleet/drivers/delete/<int:pk>/', DeleteDriverView.as_view(), name='delete_driver'),
     path('fleet/routes/', RoutesView.as_view(), name='routes'),
     path('fleet/routes/add/', AddRouteView.as_view(), name='add_route'),
     path('fleet/zones/add/', AddZoneView.as_view(), name='add_zone'),

@@ -12,8 +12,8 @@
                 Back to Directory
             </button>
             <div>
-                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">New Entry</h3>
-                <h2 class="text-4xl font-black text-white tracking-tight">Register Driver</h2>
+                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">{% if is_edit %}Update Info{% else %}New Entry{% endif %}</h3>
+                <h2 class="text-4xl font-black text-white tracking-tight">{% if is_edit %}Edit Driver{% else %}Register Driver{% endif %}</h2>
             </div>
         </div>
 
@@ -21,7 +21,7 @@
             <!-- decorative header -->
             <div class="h-2 w-full bg-gradient-to-r from-blue-600 to-indigo-500"></div>
             
-            <form class="p-10 space-y-10" hx-post="{% url 'add_driver' %}" hx-target="main" hx-push-url="{% url 'drivers' %}">
+            <form class="p-10 space-y-10" {% if is_edit %}hx-post="{% url 'edit_driver' driver.pk %}"{% else %}hx-post="{% url 'add_driver' %}"{% endif %} hx-target="main" hx-push-url="{% url 'drivers' %}">
                 {% csrf_token %}
                 
                 <div>
@@ -29,30 +29,42 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">First Name</label>
-                            <input type="text" placeholder="e.g. Marco" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="text" name="first_name" value="{{ form.first_name.value|default_if_none:'' }}" placeholder="e.g. Marco" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Last Name</label>
-                            <input type="text" placeholder="e.g. Dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="text" name="last_name" value="{{ form.last_name.value|default_if_none:'' }}" placeholder="e.g. Dela Cruz" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">License No.</label>
-                            <input type="text" placeholder="D01-12-345678" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all uppercase">
+                            <input type="text" name="license_number" value="{{ form.license_number.value|default_if_none:'' }}" placeholder="D01-12-345678" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all uppercase">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">License Expiry</label>
+                            <input type="date" name="license_expiry" value="{{ form.license_expiry.value|date:'Y-m-d'|default_if_none:'' }}" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Contact No.</label>
-                            <input type="text" placeholder="+63 9XX XXX XXXX" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="text" name="contact_number" value="{{ form.contact_number.value|default_if_none:'' }}" placeholder="+63 9XX XXX XXXX" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
-                        <div class="space-y-2 lg:col-span-2">
-                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Assigned Vehicle</label>
-                            <input type="text" placeholder="Search vehicle or plate number..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Status</label>
+                            <select name="status" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                                <option value="Active" class="bg-[#0A0B10]" {% if form.status.value == 'Active' %}selected{% endif %}>Active</option>
+                                <option value="Off Duty" class="bg-[#0A0B10]" {% if form.status.value == 'Off Duty' %}selected{% endif %}>Off Duty</option>
+                                <option value="On Leave" class="bg-[#0A0B10]" {% if form.status.value == 'On Leave' %}selected{% endif %}>On Leave</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Rating</label>
+                            <input type="number" step="0.1" name="rating" value="{{ form.rating.value|default_if_none:'5.0' }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-6 border-t border-white/10 flex justify-end gap-4">
                     <button type="button" hx-get="{% url 'drivers' %}" hx-target="main" hx-push-url="true" class="px-8 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
-                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Register Driver</button>
+                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">{% if is_edit %}Save Changes{% else %}Register Driver{% endif %}</button>
                 </div>
             </form>
         </div>

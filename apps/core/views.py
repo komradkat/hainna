@@ -33,25 +33,7 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
 
 
 
-class DriversView(HtmxTemplateMixin, TemplateView):
-    template_name = 'drivers/index.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['drivers'] = []
-        context['stats'] = {'active': 0, 'off_duty': 0, 'on_leave': 0, 'total': 0}
-        return context
-
-class AddDriverView(HtmxTemplateMixin, TemplateView):
-    template_name = 'drivers/form.html'
-    
-    def post(self, request, *args, **kwargs):
-        # Return to drivers list after mock submission
-        list_view = DriversView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
 
 class RoutesView(HtmxTemplateMixin, TemplateView):
     template_name = 'routes/index.html'
