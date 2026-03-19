@@ -12,8 +12,8 @@
                 Back to Directory
             </button>
             <div>
-                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">New Registration</h3>
-                <h2 class="text-4xl font-black text-white tracking-tight">Add Fleet Vehicle</h2>
+                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">{% if is_edit %}Vehicle Update{% else %}New Registration{% endif %}</h3>
+                <h2 class="text-4xl font-black text-white tracking-tight">{% if is_edit %}Edit Vehicle{% else %}Add Fleet Vehicle{% endif %}</h2>
             </div>
         </div>
 
@@ -21,45 +21,60 @@
             <!-- decorative header -->
             <div class="h-2 w-full bg-gradient-to-r from-blue-600 to-indigo-500"></div>
             
-            <form class="p-10 space-y-10" hx-post="{% url 'add_vehicle' %}" hx-target="main" hx-push-url="{% url 'fleet_vehicles' %}">
+            <form class="p-10 space-y-10" {% if is_edit %}hx-post="{% url 'edit_vehicle' vehicle.pk %}"{% else %}hx-post="{% url 'add_vehicle' %}"{% endif %} hx-target="main" hx-push-url="{% url 'fleet_vehicles' %}">
                 {% csrf_token %}
                 
                 <div>
                     <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">General Information</h4>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Vehicle Type</label>
-                            <select class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
-                                <option class="bg-[#0A0B10]">Semi-Trailer</option>
-                                <option class="bg-[#0A0B10]">Box Truck</option>
-                                <option class="bg-[#0A0B10]">Flatbed</option>
-                                <option class="bg-[#0A0B10]">Refrigerated</option>
-                            </select>
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Vehicle Make</label>
+                            <input type="text" name="make" value="{{ form.make.value|default_if_none:'' }}" placeholder="e.g. Isuzu" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Make & Model</label>
-                            <input type="text" placeholder="e.g. Isuzu Giga" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Vehicle Model</label>
+                            <input type="text" name="model" value="{{ form.model.value|default_if_none:'' }}" placeholder="e.g. Giga" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Year Model</label>
+                            <input type="number" name="year" value="{{ form.year.value|default_if_none:'' }}" placeholder="e.g. 2021" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Status</label>
+                            <select name="status" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
+                                <option value="Active" class="bg-[#0A0B10]" {% if form.status.value == 'Active' %}selected{% endif %}>Active</option>
+                                <option value="Maintenance" class="bg-[#0A0B10]" {% if form.status.value == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                                <option value="Out of Service" class="bg-[#0A0B10]" {% if form.status.value == 'Out of Service' %}selected{% endif %}>Out of Service</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">Registration & Driver</h4>
+                    <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">Registration & Identification</h4>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Plate Number</label>
-                            <input type="text" placeholder="XXX-0000" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all uppercase">
+                            <input type="text" name="plate_number" value="{{ form.plate_number.value|default_if_none:'' }}" required placeholder="XXX-0000" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all uppercase">
                         </div>
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Assigned Driver</label>
-                            <input type="text" placeholder="Search driver..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">VIN / Chassis No.</label>
+                            <input type="text" name="vin" value="{{ form.vin.value|default_if_none:'' }}" placeholder="17-character VIN..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all uppercase">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Current Mileage</label>
+                            <input type="number" name="mileage" value="{{ form.mileage.value|default_if_none:'0' }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Capacity</label>
+                            <input type="text" name="capacity" value="{{ form.capacity.value|default_if_none:'' }}" placeholder="e.g. 10 Tons" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-6 border-t border-white/10 flex justify-end gap-4">
                     <button type="button" hx-get="{% url 'fleet_vehicles' %}" hx-target="main" hx-push-url="true" class="px-8 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
-                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Register Vehicle</button>
+                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">{% if is_edit %}Save Changes{% else %}Register Vehicle{% endif %}</button>
                 </div>
             </form>
         </div>

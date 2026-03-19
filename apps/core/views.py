@@ -31,23 +31,7 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
         context['units'] = []
         return context
 
-class FleetVehiclesView(HtmxTemplateMixin, TemplateView):
-    template_name = 'fleet/index.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['vehicles'] = []
-        return context
-
-class AddVehicleView(HtmxTemplateMixin, TemplateView):
-    template_name = 'fleet/form.html'
-    
-    def post(self, request, *args, **kwargs):
-        list_view = FleetVehiclesView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
 
 class DriversView(HtmxTemplateMixin, TemplateView):
     template_name = 'drivers/index.html'
