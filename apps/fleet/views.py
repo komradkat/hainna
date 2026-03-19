@@ -66,7 +66,7 @@ class EditVehicleView(HtmxTemplateMixin, TemplateView):
             'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
         })
 
-class DeleteVehicleView(View):
+class DeleteVehicleView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         vehicle = get_object_or_404(Vehicle, pk=self.kwargs.get('pk'))
         vehicle.delete()
@@ -145,7 +145,7 @@ class EditDriverView(HtmxTemplateMixin, TemplateView):
             'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
         })
 
-class DeleteDriverView(View):
+class DeleteDriverView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         driver = get_object_or_404(Driver, pk=self.kwargs.get('pk'))
         driver.delete()
@@ -225,7 +225,7 @@ class EditServiceLogView(HtmxTemplateMixin, TemplateView):
             'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
         })
 
-class DeleteServiceLogView(View):
+class DeleteServiceLogView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         log = get_object_or_404(MaintenanceLog, pk=self.kwargs.get('pk'))
         log.delete()
@@ -317,7 +317,7 @@ class EditRouteView(HtmxTemplateMixin, TemplateView):
             'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
         })
 
-class DeleteRouteView(View):
+class DeleteRouteView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         route = get_object_or_404(Route, pk=self.kwargs.get('pk'))
         route.delete()
@@ -381,7 +381,7 @@ class EditZoneView(HtmxTemplateMixin, TemplateView):
             'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
         })
 
-class DeleteZoneView(View):
+class DeleteZoneView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         zone = get_object_or_404(Zone, pk=self.kwargs.get('pk'))
         zone.delete()

@@ -95,7 +95,7 @@ class EditUserView(HtmxTemplateMixin, TemplateView):
             'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
         })
 
-class DeleteUserView(View):
+class DeleteUserView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         user = get_object_or_404(User, pk=self.kwargs.get('pk'))
         user.delete()

@@ -1,15 +1,18 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from core.views import HtmxTemplateMixin
 from .models import Trip, Ticket
 from fleet.models import Route, Vehicle, Terminal
 
+@login_required
 def select_terminal(request):
     terminals = Terminal.objects.all().order_by('name')
     return render(request, 'booking/select_terminal.html', {'terminals': terminals})
 
+@login_required
 def set_terminal(request, terminal_id):
     from django.urls import reverse
     terminal = get_object_or_404(Terminal, id=terminal_id)
@@ -32,9 +35,10 @@ class BookingPOSView(HtmxTemplateMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         terminal_id = self.request.session.get('active_terminal_id')
         context['routes'] = Route.objects.filter(origin_id=terminal_id, status='Active')
-        context['active_trips'] = Trip.objects.filter(route__origin_id=terminal_id).exclude(status__in=['Completed', 'Cancelled']).order_by('-date_added')
+        context['active_trips'] = Trip.objects.filter(route__origin_id=terminal_id).exclude(status__in=['Completed', 'Cancelled']).order_by('date_added')
         return context
 
+@login_required
 def trip_details_htmx(request, trip_id):
     trip = get_object_or_404(Trip, id=trip_id)
     tickets = trip.tickets.all()
@@ -63,6 +67,7 @@ def trip_details_htmx(request, trip_id):
         'available_count': capacity - len(taken_seats)
     })
 
+@login_required
 def issue_ticket(request):
     if request.method == 'POST':
         trip_id = request.POST.get('trip_id')
@@ -143,15 +148,32 @@ class DispatchBoardView(HtmxTemplateMixin, TemplateView):
         context['inbound_trips'] = Trip.objects.filter(route__destination_id=terminal_id, status='Dispatched').order_by('last_updated')
         return context
 
+@login_required
 def update_trip_status(request, trip_id):
     if request.method == 'POST':
         trip = get_object_or_404(Trip, id=trip_id)
         new_status = request.POST.get('status')
         if new_status in dict(Trip.STATUS_CHOICES):
+            old_status = trip.status
             trip.status = new_status
             trip.save()
             
             if new_status == 'Dispatched':
                 trip.tickets.exclude(status='Cancelled').update(status='Boarded')
+            elif new_status == 'Completed' and old_status != 'Completed':
+                if trip.vehicle:
+                    # Auto-queue return trip
+                    reverse_route = Route.objects.filter(
+                        origin=trip.route.destination,
+                        destination=trip.route.origin
+                    ).first()
+                    
+                    if reverse_route:
+                        Trip.objects.create(
+                            route=reverse_route,
+                            vehicle=trip.vehicle,
+                            status='Standing By',
+                            dispatch_type=trip.dispatch_type
+                        )
                 
     return redirect('booking:dispatch')

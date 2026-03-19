@@ -39,6 +39,9 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
 
 
 @login_required
+from django.contrib.auth.decorators import login_required
+
+@login_required
 def system_status(request):
     now = datetime.datetime.now().strftime("%H:%M:%S")
     return render(request, 'partials/status_badge.html', {'time': now})
