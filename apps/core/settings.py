@@ -36,7 +36,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 PRODUCTION = env('PRODUCTION', default=False)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+ALLOWED_HOSTS = [h.strip() for h in env('ALLOWED_HOSTS', default='localhost').split(',') if h.strip()]
 
 # ── Applications ─────────────────────────────────────────────────────────────
 
@@ -136,7 +136,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # ── Security Headers ──────────────────────────────────────────────────────────
 
 # Core Security
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in env('CSRF_TRUSTED_ORIGINS', default='').split(',') if o.strip()]
 
 # SSL & Redirects (defaults are based on PRODUCTION flag if not specified in .env)
 SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', default=PRODUCTION)

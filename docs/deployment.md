@@ -175,33 +175,61 @@ tail -f /opt/hainna/logs/gunicorn-error.log
 
 ---
 
-## Deployment via Docker (Simplified)
+## Docker Deployment (Standard Workflow)
 
-For a modern, containerized deployment:
+For a production deployment using Docker with an external proxy (e.g., Nginx Proxy Manager or Cloudflare):
 
-1. **Install Docker & Docker Compose** on your VPS.
-2. **Clone the repo** and copy `.env.example` to `.env`.
-3. Set `PRODUCTION=True` and configure `DATABASE_URL` in `.env`.
-4. Run everything:
-   ```bash
-   docker-compose -f docker-compose.yml up -d
+1. **Prerequisites**:
+   - Install Docker and Docker Compose.
+   - Create an external network for your proxy: `docker network create proxy-nw`.
+
+2. **Configuration**:
+   - Clone the repository: `git clone https://github.com/komradkat/hainna.git /opt/hainna`.
+   - Create a local `.env` file on the host machine in `/opt/hainna/.env`.
+
+3. **Production `.env` Template**:
+   ```env
+   # Security
+   DEBUG=False
+   PRODUCTION=True
+   SECRET_KEY=your_very_long_random_secret_key
+   
+   # Networking
+   ALLOWED_HOSTS=hainna.yourdomain.com
+   CSRF_TRUSTED_ORIGINS=https://hainna.yourdomain.com
+   
+   # Database
+   DATABASE_URL=postgres://hainna_user:secure_password@db:5432/hainna
+   
+   # Proxy Settings
+   SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO,https
+   USE_X_FORWARDED_HOST=True
+   
+   # Traccar Integration
+   TRACCAR_URL=http://traccar:8082
+   TRACCAR_USER=admin
+   TRACCAR_PASSWORD=your_traccar_password
    ```
-5. Run initialization:
+
+4. **Initial Deployment**:
    ```bash
-   docker-compose exec app python manage.py migrate
-   docker-compose exec app python manage.py collectstatic --no-input
-   docker-compose exec app python manage.py bootstrap_admin
+   sudo docker compose up -d --build
+   ```
+
+5. **Initialize Database**:
+   ```bash
+   sudo docker compose exec app python manage.py migrate
+   sudo docker compose exec app python manage.py collectstatic --no-input
+   sudo docker compose exec app python manage.py bootstrap_admin
    ```
 
 ---
 
-## Updating
+## The Update Cycle (Clean Update)
+
+To update the application without overwriting your server-specific `.env` configuration:
 
 ```bash
-cd /opt/hainna
-git pull
-uv sync
-uv run python manage.py migrate
-uv run python manage.py collectstatic --no-input
-sudo systemctl restart hainna
+git pull && sudo docker compose up -d --build
 ```
+This command pulls the latest code and rebuilds the containers while maintaining your local environment variables.

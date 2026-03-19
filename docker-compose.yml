@@ -22,36 +22,45 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DEBUG=True
-      - PRODUCTION=False
-      - SECRET_KEY=django-insecure-dev-key-change-me-in-prod
-      - DATABASE_URL=postgres://hainna_user:hainna_password@db:5432/hainna
-      - ALLOWED_HOSTS=localhost,127.0.0.1,app
-      - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
-      - SECURE_SSL_REDIRECT=False
-      - SESSION_COOKIE_SECURE=False
-      - CSRF_COOKIE_SECURE=False
-      - SECURE_HSTS_SECONDS=0
-      - SECURE_PROXY_SSL_HEADER=HTTP_X_FORWARDED_PROTO,https
-      - USE_X_FORWARDED_HOST=True
+      - DEBUG=${DEBUG:-True}
+      - PRODUCTION=${PRODUCTION:-False}
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL:-postgres://hainna_user:hainna_password@db:5432/hainna}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1,app}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://localhost:8000,http://127.0.0.1:8000}
+      - SECURE_SSL_REDIRECT=${SECURE_SSL_REDIRECT:-False}
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE:-False}
+      - CSRF_COOKIE_SECURE=${CSRF_COOKIE_SECURE:-False}
+      - SECURE_HSTS_SECONDS=${SECURE_HSTS_SECONDS:-0}
+      - SECURE_PROXY_SSL_HEADER=${SECURE_PROXY_SSL_HEADER:-HTTP_X_FORWARDED_PROTO,https}
+      - USE_X_FORWARDED_HOST=${USE_X_FORWARDED_HOST:-True}
+    networks:
+      - default
+      - proxy-nw
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+      - traccar
 
   traccar:
     image: traccar/traccar:latest
+    container_name: traccar_service
+    volumes:
+      - traccar_data:/opt/traccar/data
     ports:
       - "8082:8082"
-      - "5055:5055"
-      - "5055:5055/udp"
-    volumes:
-      - traccar_logs:/opt/traccar/logs
-      - traccar_data:/opt/traccar/data
-    restart: unless-stopped
+      - "5000-5150:5000-5150/tcp"
+      - "5000-5150:5000-5150/udp"
+    networks:
+      - default
+    restart: always
 
 volumes:
   postgres_data:
   static_volume:
   media_volume:
-  traccar_logs:
   traccar_data:
+
+networks:
+  default:
+  proxy-nw:
+    external: true
