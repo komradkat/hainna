@@ -11,6 +11,12 @@ class HtmxTemplateMixin:
 class DashboardView(HtmxTemplateMixin, TemplateView):
     template_name = 'dashboard/index.html'
 
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated and getattr(request.user, 'requires_password_change', False):
+            from django.shortcuts import redirect
+            return redirect('change_password')
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['stats'] = {'active_units': 0, 'idle_units': 0, 'total_units': 0, 'efficiency': '0%', 'on_time_rate': '0%'}
@@ -74,11 +80,21 @@ class RoutesView(HtmxTemplateMixin, TemplateView):
         context['zone_stats'] = {'total': 0, 'active': 0, 'units_inside': 0, 'alerts': 0}
         return context
 
-class AddPersonnelView(HtmxTemplateMixin, TemplateView):
-    template_name = 'personnel/form.html'
+class AddRouteView(HtmxTemplateMixin, TemplateView):
+    template_name = 'routes/form.html'
     
     def post(self, request, *args, **kwargs):
-        list_view = PersonnelView()
+        list_view = RoutesView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
+
+class AddZoneView(HtmxTemplateMixin, TemplateView):
+    template_name = 'routes/zone_form.html'
+    
+    def post(self, request, *args, **kwargs):
+        list_view = RoutesView()
         list_view.request = request
         list_view.kwargs = kwargs
         list_view.args = args
@@ -206,6 +222,64 @@ class PersonnelView(HtmxTemplateMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['personnel'] = []
-        context['stats'] = {'total': 0, 'active': 0, 'on_leave': 0, 'departments': 0}
+        from users.models import CustomUser
+        users = CustomUser.objects.all().order_by('last_name')
+        
+        personnel_list = []
+        for u in users:
+            # Map roles to some colors for the UI
+            dept_colors = {
+                'Logistics': 'from-blue-600 to-indigo-600',
+                'Operations': 'from-emerald-600 to-teal-600',
+                'Maintenance': 'from-orange-600 to-red-600',
+                'Admin': 'from-purple-600 to-pink-600',
+            }
+            color = dept_colors.get(u.department, 'from-gray-600 to-slate-600')
+            
+            personnel_list.append({
+                'pk': u.pk,
+                'initials': u.initials,
+                'name': u.get_full_name() or u.username,
+                'role': u.role,
+                'department': u.department or 'Unassigned',
+                'dept_color': color,
+                'contact': u.phone_number or u.email,
+                'since': u.date_of_hire.strftime('%Y') if u.date_of_hire else 'N/A',
+                'status': u.status,
+            })
+            
+        context['personnel'] = personnel_list
+        context['stats'] = {
+            'total': users.count(),
+            'active': users.filter(status='Active').count(),
+            'on_leave': users.filter(status='On Leave').count(), # Status choices only has Active, Pending Verify, Suspended but template has On Leave
+            'departments': users.values('department').distinct().count()
+        }
         return context
+
+class AddPersonnelView(HtmxTemplateMixin, TemplateView):
+    template_name = 'users/form.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from users.forms import UserForm
+        context['form'] = UserForm()
+        context['is_edit'] = False
+        return context
+
+    def post(self, request, *args, **kwargs):
+        from users.forms import UserForm
+        form = UserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            list_view = PersonnelView()
+            list_view.request = request
+            list_view.kwargs = kwargs
+            list_view.args = args
+            return list_view.get(request, *args, **kwargs)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'is_edit': False,
+            'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+        })

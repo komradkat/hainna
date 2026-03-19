@@ -25,6 +25,7 @@ class CustomUser(AbstractUser):
     date_of_hire = models.DateField(blank=True, null=True)
     emergency_contact_name = models.CharField(max_length=100, blank=True, null=True)
     emergency_contact_number = models.CharField(max_length=20, blank=True, null=True)
+    requires_password_change = models.BooleanField(default=False)
 
     @property
     def initials(self):

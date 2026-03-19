@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from .views import DashboardView, LiveTrackingView, FleetVehiclesView, AddVehicleView, DriversView, AddDriverView, RoutesView, AddRouteView, AddZoneView, SchedulesView, AddScheduleView, ServiceLogsView, AddServiceLogView, FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, AddPersonnelView, system_status
-from users.views import UserManagementView, AddUserView
+from users.views import UserManagementView, AddUserView, EditUserView, DeleteUserView, ChangePasswordView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,5 +41,8 @@ urlpatterns = [
     path('personnel/add/', AddPersonnelView.as_view(), name='add_personnel'),
     path('users/', UserManagementView.as_view(), name='users'),
     path('users/add/', AddUserView.as_view(), name='add_user'),
+    path('users/edit/<int:pk>/', EditUserView.as_view(), name='edit_user'),
+    path('users/delete/<int:pk>/', DeleteUserView.as_view(), name='delete_user'),
+    path('users/change-password/', ChangePasswordView.as_view(), name='change_password'),
     path('system-status/', system_status, name='system_status'),
 ]

@@ -13,7 +13,10 @@
             </button>
             <div>
                 <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">Employee Records</h3>
-                <h2 class="text-4xl font-black text-white tracking-tight">Onboard New Employee</h2>
+                <h2 class="text-4xl font-black text-white tracking-tight">{% if is_edit %}Edit Employee Profile{% else %}Onboard New Employee{% endif %}</h2>
+                {% if is_edit %}
+                <p class="text-[10px] font-black uppercase tracking-widest text-white/40 mt-2">Managing: <span class="text-blue-400">{{ user_id }}</span></p>
+                {% endif %}
             </div>
         </div>
 
@@ -22,7 +25,7 @@
             <!-- decorative header -->
             <div class="h-2 w-full bg-gradient-to-r from-blue-600 to-indigo-500"></div>
             
-            <form class="p-10 space-y-10" hx-post="{% url 'add_user' %}" hx-target="main" hx-push-url="{% url 'users' %}">
+            <form class="p-10 space-y-10" hx-post="{% if is_edit %}{% url 'edit_user' form.instance.pk %}{% else %}{% url 'add_user' %}{% endif %}" hx-target="main" hx-push-url="{% url 'users' %}">
                 {% csrf_token %}
                 
                 <!-- Section: Personal Info -->
@@ -31,23 +34,23 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">First Name</label>
-                            <input type="text" name="first_name" placeholder="e.g. Juan" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
+                            <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" placeholder="e.g. Juan" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Last Name</label>
-                            <input type="text" name="last_name" placeholder="e.g. Dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
+                            <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" placeholder="e.g. Dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Email Address</label>
-                            <input type="email" name="email" placeholder="e.g. juan@hainna.ph" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
+                            <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="e.g. juan@hainna.ph" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all" required>
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Phone Number</label>
-                            <input type="tel" name="phone_number" placeholder="e.g. 0912 345 6789" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="tel" name="phone_number" value="{{ form.phone_number.value|default:'' }}" placeholder="e.g. 0912 345 6789" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                         <div class="space-y-2 xl:col-span-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Home Address</label>
-                            <input type="text" name="address" placeholder="e.g. 123 Quezon City" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="text" name="address" value="{{ form.address.value|default:'' }}" placeholder="e.g. 123 Quezon City" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                     </div>
                 </div>
@@ -58,15 +61,15 @@
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Department</label>
-                            <input type="text" name="department" placeholder="e.g. Logistics" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="text" name="department" value="{{ form.department.value|default:'' }}" placeholder="e.g. Logistics" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Position / Title</label>
-                            <input type="text" name="position" placeholder="e.g. Senior Driver" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="text" name="position" value="{{ form.position.value|default:'' }}" placeholder="e.g. Senior Driver" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Date of Hire</label>
-                            <input type="date" name="date_of_hire" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="date" name="date_of_hire" value="{{ form.date_of_hire.value|date:'Y-m-d'|default:'' }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                     </div>
                 </div>
@@ -77,11 +80,11 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Contact Name</label>
-                            <input type="text" name="emergency_contact_name" placeholder="e.g. Maria Dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="text" name="emergency_contact_name" value="{{ form.emergency_contact_name.value|default:'' }}" placeholder="e.g. Maria Dela Cruz" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Contact Number</label>
-                            <input type="tel" name="emergency_contact_number" placeholder="e.g. 0912 345 6789" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            <input type="tel" name="emergency_contact_number" value="{{ form.emergency_contact_number.value|default:'' }}" placeholder="e.g. 0912 345 6789" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
                         </div>
                     </div>
                 </div>
@@ -93,26 +96,33 @@
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Access Role</label>
                             <select name="role" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
-                                <option value="Administrator" class="bg-[#0A0B10]">Administrator</option>
-                                <option value="Fleet Manager" class="bg-[#0A0B10]">Fleet Manager</option>
-                                <option value="Dispatcher" class="bg-[#0A0B10]">Dispatcher</option>
-                                <option value="Maintenance Tech" class="bg-[#0A0B10]">Maintenance Tech</option>
+                                <option value="Administrator" class="bg-[#0A0B10]" {% if form.role.value == 'Administrator' %}selected{% endif %}>Administrator</option>
+                                <option value="Fleet Manager" class="bg-[#0A0B10]" {% if form.role.value == 'Fleet Manager' %}selected{% endif %}>Fleet Manager</option>
+                                <option value="Dispatcher" class="bg-[#0A0B10]" {% if form.role.value == 'Dispatcher' or not form.role.value %}selected{% endif %}>Dispatcher</option>
+                                <option value="Maintenance Tech" class="bg-[#0A0B10]" {% if form.role.value == 'Maintenance Tech' %}selected{% endif %}>Maintenance Tech</option>
                             </select>
                         </div>
                         <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Initial Status</label>
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Account Status</label>
                             <select name="status" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer">
-                                <option value="Active" class="bg-[#0A0B10]">Active</option>
-                                <option value="Pending Verify" class="bg-[#0A0B10]">Pending Verify</option>
-                                <option value="Suspended" class="bg-[#0A0B10]">Suspended</option>
+                                <option value="Active" class="bg-[#0A0B10]" {% if form.status.value == 'Active' %}selected{% endif %}>Active</option>
+                                <option value="Pending Verify" class="bg-[#0A0B10]" {% if form.status.value == 'Pending Verify' or not form.status.value %}selected{% endif %}>Pending Verify</option>
+                                <option value="Suspended" class="bg-[#0A0B10]" {% if form.status.value == 'Suspended' %}selected{% endif %}>Suspended</option>
                             </select>
+                        </div>
+                        <div class="space-y-2 lg:col-span-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">{% if is_edit %}New Password (leave blank to keep current){% else %}System Password{% endif %}</label>
+                            <input type="password" name="password" placeholder="••••••••" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all">
+                            {% if not is_edit %}
+                            <p class="text-[9px] font-bold text-white/20 ml-1">Default: hainna2026</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-6 border-t border-white/10 flex justify-end gap-4">
                     <button type="button" hx-get="{% url 'users' %}" hx-target="main" hx-push-url="true" class="px-8 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
-                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Create Profile</button>
+                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">{% if is_edit %}Save Changes{% else %}Create Profile{% endif %}</button>
                 </div>
             </form>
         </div>
