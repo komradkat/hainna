@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local env
+.env
+db.sqlite3
+
+# Static / Media (handled by volumes)
+staticfiles/
+media/
+logs/
+
+# UV
+uv.lock
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore

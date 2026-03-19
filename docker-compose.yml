@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=hainna
+      - POSTGRES_USER=hainna_user
+      - POSTGRES_PASSWORD=hainna_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hainna_user -d hainna"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - PRODUCTION=False
+      - SECRET_KEY=django-insecure-dev-key-change-me-in-prod
+      - DATABASE_URL=postgres://hainna_user:hainna_password@db:5432/hainna
+      - ALLOWED_HOSTS=localhost,127.0.0.1,app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  traccar:
+    image: traccar/traccar:latest
+    ports:
+      - "8082:8082"
+      - "5055:5055"
+      - "5055:5055/udp"
+    volumes:
+      - traccar_logs:/opt/traccar/logs
+      - traccar_data:/opt/traccar/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  traccar_logs:
+  traccar_data:

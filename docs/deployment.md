@@ -170,6 +170,26 @@ tail -f /opt/hainna/logs/gunicorn-error.log
 
 ---
 
+## Deployment via Docker (Simplified)
+
+For a modern, containerized deployment:
+
+1. **Install Docker & Docker Compose** on your VPS.
+2. **Clone the repo** and copy `.env.example` to `.env`.
+3. Set `PRODUCTION=True` and configure `DATABASE_URL` in `.env`.
+4. Run everything:
+   ```bash
+   docker-compose -f docker-compose.yml up -d
+   ```
+5. Run initialization:
+   ```bash
+   docker-compose exec app python manage.py migrate
+   docker-compose exec app python manage.py collectstatic --no-input
+   docker-compose exec app python manage.py bootstrap_admin
+   ```
+
+---
+
 ## Updating
 
 ```bash

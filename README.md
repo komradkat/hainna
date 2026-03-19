@@ -59,6 +59,21 @@ uv run python manage.py runserver
 
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and log in.
 
+### Using Docker (Recommended for Local & Prod)
+
+```bash
+# 1. Start all services (Django + Postgres + Traccar)
+docker-compose up -d
+
+# 2. Run migrations
+docker-compose exec app python manage.py migrate
+
+# 3. Create admin
+docker-compose exec app python manage.py bootstrap_admin
+```
+
+The app will be at [http://localhost:8000](http://localhost:8000), Traccar at [http://localhost:8082](http://localhost:8082).
+
 ---
 
 ## Environment Variables
