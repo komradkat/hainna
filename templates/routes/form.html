@@ -51,10 +51,35 @@
                                     {{ form.est_travel_time }}
                                 </div>
                             </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Route Status</label>
-                                {{ form.status }}
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Route Status</label>
+                                    {{ form.status }}
+                                </div>
+                                <div class="space-y-3 pt-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Map Color</label>
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="color-btn w-7 h-7 rounded-lg border border-white/10 focus:outline-none transition-all ring-2 ring-offset-2 ring-offset-[#0d1117] ring-transparent" data-color="#3b82f6" style="background-color: #3b82f6;"></button>
+                                        <button type="button" class="color-btn w-7 h-7 rounded-lg border border-white/10 focus:outline-none transition-all ring-2 ring-offset-2 ring-offset-[#0d1117] ring-transparent" data-color="#10b981" style="background-color: #10b981;"></button>
+                                        <button type="button" class="color-btn w-7 h-7 rounded-lg border border-white/10 focus:outline-none transition-all ring-2 ring-offset-2 ring-offset-[#0d1117] ring-transparent" data-color="#f59e0b" style="background-color: #f59e0b;"></button>
+                                        <button type="button" class="color-btn w-7 h-7 rounded-lg border border-white/10 focus:outline-none transition-all ring-2 ring-offset-2 ring-offset-[#0d1117] ring-transparent" data-color="#ef4444" style="background-color: #ef4444;"></button>
+                                        <button type="button" class="color-btn w-7 h-7 rounded-lg border border-white/10 focus:outline-none transition-all ring-2 ring-offset-2 ring-offset-[#0d1117] ring-transparent" data-color="#8b5cf6" style="background-color: #8b5cf6;"></button>
+                                        <button type="button" class="color-btn w-7 h-7 rounded-lg border border-white/10 focus:outline-none transition-all ring-2 ring-offset-2 ring-offset-[#0d1117] ring-transparent" data-color="#ec4899" style="background-color: #ec4899;"></button>
+                                    </div>
+                                    {{ form.color }}
+                                </div>
                             </div>
+
+                            <div class="mt-8">
+                                <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+                                    <h4 class="text-[10px] font-black uppercase tracking-widest text-white/50">Terminal Points</h4>
+                                    <button type="button" onclick="clearWaypoints()" class="text-[9px] font-black uppercase tracking-[0.1em] text-red-500 hover:text-red-400 transition-colors">Clear All Pins</button>
+                                </div>
+                                <div id="waypoints-list" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+                                    <p class="text-[10px] font-bold text-white/30 text-center py-4 italic">No points plotted yet. Click map to start.</p>
+                                </div>
+                            </div>
+
                             <!-- Hidden JSON geographic dumps -->
                             {{ form.waypoints }}
                             {{ form.path_coordinates }}
@@ -109,7 +134,6 @@
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 18 }).addTo(map);
 
         let waypoints = [];
-        let routingControl = null;
 
         // Input Bindings
         const wpInput = document.getElementById('route_waypoints_input');
@@ -118,73 +142,188 @@
         const timeInput = document.getElementById('route_time_input');
         const originInput = document.getElementById('route_origin_input');
         const destInput = document.getElementById('route_destination_input');
+        const colorInput = document.getElementById('route_color_input');
+
+        if (!colorInput.value) colorInput.value = '#3b82f6';
+        let routeColor = colorInput.value;
+
+        // Color UI Binding
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            if (btn.dataset.color === routeColor) {
+                btn.classList.add('ring-white/50');
+                btn.classList.remove('ring-transparent');
+            }
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.color-btn').forEach(b => {
+                    b.classList.remove('ring-white/50');
+                    b.classList.add('ring-transparent');
+                });
+                const selectedBtn = e.currentTarget;
+                selectedBtn.classList.add('ring-white/50');
+                selectedBtn.classList.remove('ring-transparent');
+                
+                routeColor = selectedBtn.dataset.color;
+                colorInput.value = routeColor;
+
+                if (routingControl) {
+                    routingControl.options.lineOptions.styles[0].color = routeColor;
+                    routingControl.route();
+                    drawGeofences(); // Sync circle colors instantly
+                }
+            });
+        });
 
         // Initial Data Hydration for Edits
         if (wpInput.value) {
             try {
                 const wps = JSON.parse(wpInput.value);
                 waypoints = wps.map(w => L.latLng(w.lat, w.lng));
-                calculateRoute();
             } catch (e) { console.error("Could not parse initialized route waypoints"); }
         }
 
-        map.on('click', function(e) {
-            if (waypoints.length >= 2) waypoints = []; // Reset if 2 clicks exist
-            waypoints.push(e.latlng);
-            calculateRoute();
-        });
-
-        function calculateRoute() {
-            if (routingControl) {
-                map.removeControl(routingControl);
+        const routingControl = L.Routing.control({
+            waypoints: waypoints,
+            router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
+            lineOptions: { styles: [{ color: routeColor, weight: 4, opacity: 0.8 }] },
+            routeWhileDragging: true,
+            addWaypoints: true,
+            fitSelectedRoutes: false,
+            show: false,
+            createMarker: function(i, wp, nWps) {
+                // Generate a visual draggable marker allowing path manipulation
+                return L.marker(wp.latLng, {
+                    draggable: true,
+                    title: i === 0 ? "Origin" : (i === nWps - 1 ? "Destination" : "Via Point")
+                });
             }
+        }).addTo(map);
 
-            // Sync visual waypoints to hidden JSON
-            wpInput.value = JSON.stringify(waypoints);
+        const geofenceInput = document.getElementById('route_geofence_input');
+        let geofenceCircles = [];
 
-            if (waypoints.length > 0) {
-                // Populate origin/dest with placeholder coordinates if empty, real production may reverse-geocode here.
-                if (waypoints.length === 1) originInput.value = originInput.value || `${waypoints[0].lat.toFixed(4)}, ${waypoints[0].lng.toFixed(4)}`;
-                if (waypoints.length === 2) destInput.value = destInput.value || `${waypoints[1].lat.toFixed(4)}, ${waypoints[1].lng.toFixed(4)}`;
-            }
-
-            if (waypoints.length < 2) {
-                // Just draw a marker if only Origin is set
-                if (waypoints.length === 1) {
-                    L.marker(waypoints[0]).addTo(map);
-                }
-                return;
-            }
-
-            routingControl = L.Routing.control({
-                waypoints: waypoints,
-                router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
-                lineOptions: { styles: [{ color: '#3b82f6', weight: 4, opacity: 0.8 }] },
-                createMarker: function() { return null; }, // We handle basic markers natively or just let routing draw lines
-                fitSelectedRoutes: true,
-                show: false
-            }).addTo(map);
-
-            routingControl.on('routesfound', function(e) {
-                const routes = e.routes;
-                if (routes.length > 0) {
-                    const route = routes[0];
-                    // Strip the full polyline path mapping back into JSON
-                    const coordinates = route.coordinates.map(c => ({ lat: c.lat, lng: c.lng }));
-                    pathInput.value = JSON.stringify(coordinates);
-                    
-                    // Convert measurements to appropriate format
-                    const distKm = (route.summary.totalDistance / 1000).toFixed(2);
-                    const totalSecs = route.summary.totalTime;
-                    const hours = Math.floor(totalSecs / 3600);
-                    const mins = Math.floor((totalSecs % 3600) / 60);
-                    const timeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-
-                    distInput.value = distKm;
-                    timeInput.value = timeStr;
+        function drawGeofences() {
+            geofenceCircles.forEach(c => map.removeLayer(c));
+            geofenceCircles = [];
+            
+            const currentWps = routingControl.getWaypoints().filter(w => w.latLng);
+            const radius = parseInt(geofenceInput.value) || 500;
+            
+            currentWps.forEach((wp, idx) => {
+                if (idx === 0 || idx === currentWps.length - 1) {
+                    const circle = L.circle(wp.latLng, {
+                        color: routeColor,
+                        fillColor: routeColor,
+                        fillOpacity: 0.1,
+                        radius: radius,
+                        weight: 1,
+                        dashArray: '4, 4'
+                    }).addTo(map);
+                    geofenceCircles.push(circle);
                 }
             });
         }
+        
+        geofenceInput.addEventListener('input', drawGeofences);
+
+        const listContainer = document.getElementById('waypoints-list');
+
+        function renderWaypointList() {
+            const currentWps = routingControl.getWaypoints().filter(w => w.latLng);
+            drawGeofences(); // Enforce synced geometry on waypoints update
+            
+            if (currentWps.length === 0) {
+                listContainer.innerHTML = '<p class="text-[10px] font-bold text-white/30 text-center py-4 italic">No points plotted yet. Click map to start.</p>';
+                return;
+            }
+            
+            listContainer.innerHTML = '';
+            currentWps.forEach((wp, index) => {
+                const label = index === 0 ? 'Origin' : (index === currentWps.length - 1 ? 'Destination' : `Via Point ${index}`);
+                const latStr = wp.latLng.lat.toFixed(5);
+                const lngStr = wp.latLng.lng.toFixed(5);
+                
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl group transition-colors hover:bg-white/[0.07]';
+                item.innerHTML = `
+                    <div>
+                        <p class="text-[9px] font-black uppercase tracking-widest text-blue-500 mb-0.5">${label}</p>
+                        <p class="text-xs font-bold text-white/80">${latStr}, ${lngStr}</p>
+                    </div>
+                    <button type="button" onclick="removeWaypoint(${index})" class="w-6 h-6 rounded-md bg-red-500/10 text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white" title="Remove Point">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        window.removeWaypoint = function(index) {
+            let currentWps = routingControl.getWaypoints();
+            currentWps.splice(index, 1);
+            routingControl.setWaypoints(currentWps);
+            
+            if (currentWps.filter(w => w.latLng).length === 0) {
+                wpInput.value = '';
+                pathInput.value = '';
+                distInput.value = '';
+                timeInput.value = '';
+                originInput.value = '';
+                destInput.value = '';
+            }
+            renderWaypointList();
+        };
+
+        window.clearWaypoints = function() {
+            routingControl.setWaypoints([]);
+            wpInput.value = '';
+            pathInput.value = '';
+            distInput.value = '';
+            timeInput.value = '';
+            originInput.value = '';
+            destInput.value = '';
+            renderWaypointList();
+        };
+
+        routingControl.on('waypointschanged', function() {
+            renderWaypointList();
+        });
+
+        routingControl.on('routesfound', function(e) {
+            const routes = e.routes;
+            if (routes.length > 0) {
+                const route = routes[0];
+                
+                // Strip the full polyline path mapping back into JSON
+                const coordinates = route.coordinates.map(c => ({ lat: c.lat, lng: c.lng }));
+                pathInput.value = JSON.stringify(coordinates);
+                
+                // Capture any dragging additions explicitly into the Waypoints array constraint
+                const finalWps = routingControl.getWaypoints().filter(w => w.latLng).map(w => ({ lat: w.latLng.lat, lng: w.latLng.lng }));
+                wpInput.value = JSON.stringify(finalWps);
+                
+                // Convert measurements to appropriate format
+                const distKm = (route.summary.totalDistance / 1000).toFixed(2);
+                const totalSecs = route.summary.totalTime;
+                const hours = Math.floor(totalSecs / 3600);
+                const mins = Math.floor((totalSecs % 3600) / 60);
+                const timeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+
+                distInput.value = distKm;
+                timeInput.value = timeStr;
+                
+                if (finalWps.length >= 2) {
+                    if (!originInput.value) originInput.value = `${finalWps[0].lat.toFixed(4)}, ${finalWps[0].lng.toFixed(4)}`;
+                    if (!destInput.value) destInput.value = `${finalWps[finalWps.length - 1].lat.toFixed(4)}, ${finalWps[finalWps.length - 1].lng.toFixed(4)}`;
+                }
+            }
+        });
+
+        // Add additional terminal stops or origin anchors simply strictly by clicking
+        map.on('click', function(e) {
+            let currentWps = routingControl.getWaypoints().filter(w => w.latLng);
+            currentWps.push(L.Routing.waypoint(e.latlng));
+            routingControl.setWaypoints(currentWps);
+        });
 
         new ResizeObserver(() => { if (window.routeBuilderMap) window.routeBuilderMap.invalidateSize(); }).observe(el);
     }

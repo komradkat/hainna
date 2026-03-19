@@ -26,7 +26,7 @@ class ServiceLogForm(forms.ModelForm):
 class RouteForm(forms.ModelForm):
     class Meta:
         model = Route
-        fields = ['name', 'origin', 'destination', 'distance_km', 'est_travel_time', 'status', 'waypoints', 'path_coordinates']
+        fields = ['name', 'origin', 'destination', 'distance_km', 'est_travel_time', 'status', 'geofence_radius_meters', 'color', 'waypoints', 'path_coordinates']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all', 'placeholder': 'e.g. Manila – North Port Express'}),
             'origin': forms.TextInput(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all', 'placeholder': 'e.g. Manila Hub', 'id': 'route_origin_input'}),
@@ -34,6 +34,8 @@ class RouteForm(forms.ModelForm):
             'distance_km': forms.NumberInput(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all', 'placeholder': 'e.g. 45', 'id': 'route_distance_input', 'step': '0.01'}),
             'est_travel_time': forms.TextInput(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all', 'placeholder': 'e.g. 1h 30m', 'id': 'route_time_input'}),
             'status': forms.Select(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer'}),
+            'geofence_radius_meters': forms.NumberInput(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all', 'id': 'route_geofence_input', 'min': '10', 'max': '50000'}),
+            'color': forms.HiddenInput(attrs={'id': 'route_color_input'}),
             'waypoints': forms.HiddenInput(attrs={'id': 'route_waypoints_input'}),
             'path_coordinates': forms.HiddenInput(attrs={'id': 'route_path_input'}),
         }

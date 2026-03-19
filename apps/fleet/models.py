@@ -97,6 +97,8 @@ class Route(models.Model):
     distance_km = models.DecimalField(max_digits=10, decimal_places=2, help_text="Total route distance in kilometers")
     est_travel_time = models.CharField(max_length=50, help_text="Estimated travel time, e.g., '1h 30m'")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Active')
+    color = models.CharField(max_length=20, default="#3b82f6", blank=True, help_text="Hex color code for map rendering")
+    geofence_radius_meters = models.IntegerField(default=500, help_text="Meters around each terminal point to trigger arriving alerts")
     
     # Geographic Routing Cache
     waypoints = models.JSONField(default=list, blank=True, help_text="List of lat/lng coordinates for terminal routing stops explicitly plotted")
@@ -109,6 +111,11 @@ class Route(models.Model):
     def path_json(self):
         import json
         return json.dumps(self.path_coordinates) if self.path_coordinates else "[]"
+
+    @property
+    def waypoints_json(self):
+        import json
+        return json.dumps(self.waypoints) if self.waypoints else "[]"
 
     def __str__(self):
         return f"{self.name} ({self.origin} - {self.destination})"

@@ -238,7 +238,9 @@
             try {
                 routes.push({
                     points: {{ route.path_json|safe }},
-                    color: '{% if route.status == "Active" %}#3b82f6{% elif route.status == "Delayed" %}#f59e0b{% else %}#ffffff{% endif %}'
+                    waypoints: {{ route.waypoints_json|safe }},
+                    color: '{{ route.color|default:"#3b82f6" }}',
+                    radius: parseInt('{{ route.geofence_radius_meters|default:500 }}')
                 });
             } catch(e) {}
             {% endif %}
@@ -247,6 +249,15 @@
         routes.forEach(r => {
             if (r.points && r.points.length > 0) {
                 L.polyline(r.points, { color: r.color, weight: 4, opacity: 0.8 }).addTo(map);
+            }
+            if (r.waypoints && r.waypoints.length > 0) {
+                r.waypoints.forEach((wp, idx) => {
+                    const isTerminal = (idx === 0 || idx === r.waypoints.length - 1);
+                    if (isTerminal) {
+                       L.circleMarker([wp.lat, wp.lng], { color: r.color, radius: 4, fillOpacity: 1 }).addTo(map);
+                       L.circle([wp.lat, wp.lng], { color: r.color, radius: r.radius, fillOpacity: 0.05, weight: 1, dashArray: '4,4' }).addTo(map);
+                    }
+                });
             }
         });
 
