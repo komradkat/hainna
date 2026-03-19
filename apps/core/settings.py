@@ -186,6 +186,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
     'fleet.apps.FleetConfig',
+    'booking.apps.BookingConfig',
 ]
 
 MIDDLEWARE = [
