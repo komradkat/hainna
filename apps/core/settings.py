@@ -17,6 +17,11 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 env = environ.Env(
     DEBUG=(bool, False),
     PRODUCTION=(bool, False),
+    CSRF_TRUSTED_ORIGINS=(list, []),
+    SECURE_SSL_REDIRECT=(bool, False),
+    SESSION_COOKIE_SECURE=(bool, False),
+    CSRF_COOKIE_SECURE=(bool, False),
+    SECURE_HSTS_SECONDS=(int, 0),
 )
 
 # Reading .env file
@@ -125,18 +130,23 @@ LOGOUT_REDIRECT_URL = 'login'
 SESSION_COOKIE_AGE = 28800       # 8 hours in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# ── Security Headers (active only when PRODUCTION=True) ───────────────────────
+# ── Security Headers ──────────────────────────────────────────────────────────
+
+# Core Security
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+
+# SSL & Redirects (defaults are based on PRODUCTION flag if not specified in .env)
+SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', default=PRODUCTION)
+SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE', default=PRODUCTION)
+CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE', default=PRODUCTION)
+SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=31536000 if PRODUCTION else 0)
 
 if PRODUCTION:
-    SECURE_SSL_REDIRECT = True
-    SECURE_HSTS_SECONDS = 31536000          # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
 else:
-    SECURE_SSL_REDIRECT = False
-    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True

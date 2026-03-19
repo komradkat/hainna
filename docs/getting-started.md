@@ -35,6 +35,9 @@ DEBUG=True
 SECRET_KEY=any-random-string-for-local-dev
 DATABASE_URL=sqlite:///db.sqlite3
 ALLOWED_HOSTS=127.0.0.1,localhost
+
+# CSRF (Required for some POST operations if using custom domains)
+# CSRF_TRUSTED_ORIGINS=http://localhost:8000
 ```
 
 ```bash

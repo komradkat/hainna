@@ -27,7 +27,15 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV DJANGO_SETTINGS_MODULE=core.settings
+ENV PYTHONPATH="/app/apps"
 ENV PATH="/app/.venv/bin:$PATH"
+
+# New Security Environment Variables (Defaults)
+ENV CSRF_TRUSTED_ORIGINS=""
+ENV SECURE_SSL_REDIRECT=False
+ENV SESSION_COOKIE_SECURE=False
+ENV CSRF_COOKIE_SECURE=False
+ENV SECURE_HSTS_SECONDS=0
 
 # Collect static files (requires standard dummy env vars if they aren't provided)
 # Note: In a real deploy, you'd provide real env vars or skip this until runtime.

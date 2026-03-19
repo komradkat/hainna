@@ -27,6 +27,11 @@ services:
       - SECRET_KEY=django-insecure-dev-key-change-me-in-prod
       - DATABASE_URL=postgres://hainna_user:hainna_password@db:5432/hainna
       - ALLOWED_HOSTS=localhost,127.0.0.1,app
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+      - SECURE_SSL_REDIRECT=False
+      - SESSION_COOKIE_SECURE=False
+      - CSRF_COOKIE_SECURE=False
+      - SECURE_HSTS_SECONDS=0
     depends_on:
       db:
         condition: service_healthy
