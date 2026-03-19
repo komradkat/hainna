@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 import urllib.request
 import json
-from fleet.models import Route
+from fleet.models import Route, Terminal
 
 class Command(BaseCommand):
     help = 'Seeds Route database with mock Leyte map coordinates'
@@ -78,8 +78,22 @@ class Command(BaseCommand):
             }
         ]
 
-        self.stdout.write("Clearing old routes...")
+        self.stdout.write("Clearing old routes & terminals...")
         Route.objects.all().delete()
+        Terminal.objects.all().delete()
+
+        self.stdout.write("Bootstrapping Terminal Nodes...")
+        terminals_data = [
+            ("Tacloban City Hub", 11.2430, 125.0081),
+            ("Ormoc City Terminal", 11.0050, 124.6075),
+            ("Baybay City Terminal", 10.6765, 124.7966),
+            ("Palompon Port", 11.0489, 124.3831),
+            ("Carigara Terminal", 11.3000, 124.6833),
+            ("Maasin City Hub", 10.1333, 124.8333),
+        ]
+        term_map = {}
+        for name, lat, lng in terminals_data:
+            term_map[name] = Terminal.objects.create(name=name, location_lat=lat, location_lng=lng)
 
         self.stdout.write("Seeding Leyte routes via OSRM...")
         for r in routes:
@@ -88,8 +102,8 @@ class Command(BaseCommand):
             if osrm_data:
                 Route.objects.create(
                     name=r['name'],
-                    origin=r['origin'],
-                    destination=r['destination'],
+                    origin=term_map[r['origin']],
+                    destination=term_map[r['destination']],
                     distance_km=osrm_data['distance_km'],
                     est_travel_time=osrm_data['est_travel_time'],
                     status='Active',

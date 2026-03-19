@@ -84,6 +84,17 @@ class MaintenanceLog(models.Model):
     def __str__(self):
         return f"{self.service_type} - {self.vehicle.plate_number} ({self.date})"
 
+class Terminal(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    location_lat = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    location_lng = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    
+    date_added = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
 class Route(models.Model):
     STATUS_CHOICES = [
         ('Active', 'Active'),
@@ -92,8 +103,8 @@ class Route(models.Model):
     ]
 
     name = models.CharField(max_length=100)
-    origin = models.CharField(max_length=100)
-    destination = models.CharField(max_length=200)
+    origin = models.ForeignKey(Terminal, on_delete=models.CASCADE, related_name='outbound_routes')
+    destination = models.ForeignKey(Terminal, on_delete=models.CASCADE, related_name='inbound_routes')
     distance_km = models.DecimalField(max_digits=10, decimal_places=2, help_text="Total route distance in kilometers")
     est_travel_time = models.CharField(max_length=50, help_text="Estimated travel time, e.g., '1h 30m'")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Active')

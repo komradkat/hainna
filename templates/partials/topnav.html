@@ -18,6 +18,15 @@
     </div>
 
     <div class="flex-none gap-4 items-center">
+        <!-- Terminal Context Aware Chooser -->
+        <a href="{% url 'booking:select_terminal' %}" class="hidden lg:flex items-center gap-3 px-5 bg-blue-500/10 hover:bg-blue-500/20 rounded-full py-2 border border-blue-500/20 transition-colors cursor-pointer mr-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <div class="flex flex-col">
+                <span class="text-[9px] font-black uppercase tracking-widest text-blue-500/50 leading-none mb-0.5">Active Station</span>
+                <span class="text-xs font-bold text-blue-100 leading-none">{{ request.session.active_terminal_name|default:"Select Terminal" }}</span>
+            </div>
+        </a>
+
         <!-- Clock & System Status -->
         <div class="hidden lg:flex items-center gap-6 px-4 bg-white/5 rounded-full py-2 border border-white/5">
             <div id="clock" class="text-sm font-black font-mono tracking-wider text-white opacity-60">00:00:00</div>

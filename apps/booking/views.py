@@ -4,15 +4,35 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from core.views import HtmxTemplateMixin
 from .models import Trip, Ticket
-from fleet.models import Route, Vehicle
+from fleet.models import Route, Vehicle, Terminal
+
+def select_terminal(request):
+    terminals = Terminal.objects.all().order_by('name')
+    return render(request, 'booking/select_terminal.html', {'terminals': terminals})
+
+def set_terminal(request, terminal_id):
+    from django.urls import reverse
+    terminal = get_object_or_404(Terminal, id=terminal_id)
+    request.session['active_terminal_id'] = terminal.id
+    request.session['active_terminal_name'] = terminal.name
+    
+    next_url = request.GET.get('next') or request.META.get('HTTP_REFERER') or reverse('booking:pos')
+    return redirect(next_url)
 
 class BookingPOSView(HtmxTemplateMixin, TemplateView):
     template_name = 'booking/pos.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.session.get('active_terminal_id'):
+            from django.urls import reverse
+            return redirect(f"{reverse('booking:select_terminal')}?next={request.path}")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['routes'] = Route.objects.filter(status='Active')
-        context['active_trips'] = Trip.objects.exclude(status__in=['Completed', 'Cancelled']).order_by('-date_added')
+        terminal_id = self.request.session.get('active_terminal_id')
+        context['routes'] = Route.objects.filter(origin_id=terminal_id, status='Active')
+        context['active_trips'] = Trip.objects.filter(route__origin_id=terminal_id).exclude(status__in=['Completed', 'Cancelled']).order_by('-date_added')
         return context
 
 def trip_details_htmx(request, trip_id):
@@ -67,26 +87,60 @@ def issue_ticket(request):
 
 class PublicBoardView(TemplateView):
     template_name = 'booking/public_board.html'
-
-def public_board_feed(request):
-    trips = Trip.objects.filter(status__in=['Pending Vehicle', 'Standing By', 'Loading']).order_by('-last_updated')
     
-    loading = trips.filter(status='Loading')
-    standing_by = trips.filter(status='Standing By')
-    arriving = trips.filter(status='Pending Vehicle')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        import urllib.parse
+        context['terminal_name'] = urllib.parse.unquote(self.kwargs.get('terminal_name', 'Terminal'))
+        return context
+
+def public_board_feed(request, terminal_name):
+    import urllib.parse, datetime
+    term = urllib.parse.unquote(terminal_name)
+    
+    outbound = Trip.objects.filter(route__origin__name__iexact=term)
+    loading = outbound.filter(status='Loading').order_by('last_updated')
+    standing_by = outbound.filter(status='Standing By').order_by('last_updated')
+    
+    inbound_arriving = list(Trip.objects.filter(
+        route__destination__name__iexact=term,
+        status='Dispatched'
+    ).select_related('route'))
+    
+    def calculate_eta(trip):
+        try:
+            # Assuming van avgs 60 km/h to compute transit duration accurately
+            hours = float(trip.route.distance_km) / 60.0
+            return trip.last_updated + datetime.timedelta(hours=hours)
+        except:
+            return trip.last_updated
+
+    inbound_arriving.sort(key=calculate_eta)
     
     return render(request, 'booking/partials/board_feed.html', {
         'loading': loading,
         'standing_by': standing_by,
-        'arriving': arriving
+        'arriving': inbound_arriving,
+        'terminal_name': term
     })
 
 class DispatchBoardView(HtmxTemplateMixin, TemplateView):
     template_name = 'booking/dispatch.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.session.get('active_terminal_id'):
+            from django.urls import reverse
+            return redirect(f"{reverse('booking:select_terminal')}?next={request.path}")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['active_trips'] = Trip.objects.exclude(status__in=['Completed', 'Cancelled']).order_by('date_added')
+        terminal_id = self.request.session.get('active_terminal_id')
+        
+        # Outbound local dispatch elements
+        context['active_trips'] = Trip.objects.filter(route__origin_id=terminal_id).exclude(status__in=['Completed', 'Cancelled', 'Dispatched']).order_by('date_added')
+        # Inbound targets
+        context['inbound_trips'] = Trip.objects.filter(route__destination_id=terminal_id, status='Dispatched').order_by('last_updated')
         return context
 
 def update_trip_status(request, trip_id):

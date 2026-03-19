@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Operating Terminal - HainNa{% endblock %}
+
+{% block content %}
+<div class="h-full flex items-center justify-center p-6 animate-fade-in bg-base-300">
+    <div class="w-full max-w-4xl">
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-black uppercase tracking-tighter text-white">Select Operating Terminal</h1>
+            <p class="text-lg font-bold tracking-widest text-emerald-500 mt-4 uppercase">Locking Operations Context</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for term in terminals %}
+            <a href="{% url 'booking:set_terminal' term.id %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="bg-base-200 border border-white/5 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-all rounded-3xl p-8 flex flex-col items-center justify-center cursor-pointer group shadow-xl">
+                <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6 group-hover:bg-emerald-500/20 group-hover:text-emerald-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                </div>
+                <h2 class="text-2xl font-black text-white tracking-tight text-center">{{ term.name }}</h2>
+                <p class="text-xs font-bold text-white/30 uppercase tracking-widest mt-3">Lat: {{ term.location_lat|default:"N/A" }}</p>
+            </a>
+            {% empty %}
+            <div class="col-span-full py-12 text-center text-white/30 font-bold uppercase tracking-widest border-2 border-dashed border-white/10 rounded-3xl">
+                No Terminals Initialized in the Database
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
