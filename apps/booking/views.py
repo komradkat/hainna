@@ -10,7 +10,11 @@ from fleet.models import Route, Vehicle, Terminal
 @login_required
 def select_terminal(request):
     terminals = Terminal.objects.all().order_by('name')
-    return render(request, 'booking/select_terminal.html', {'terminals': terminals})
+    base_template = 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+    return render(request, 'booking/select_terminal.html', {
+        'terminals': terminals,
+        'base_template': base_template
+    })
 
 @login_required
 def set_terminal(request, terminal_id):
