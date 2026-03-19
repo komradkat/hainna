@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="h-full overflow-y-auto bg-[#0A0B10] custom-scrollbar p-10">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         <div class="flex flex-col items-start gap-4 mb-10">
             <button hx-get="{% url 'routes' %}" hx-target="main" hx-push-url="true" class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white flex items-center gap-2 transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -12,56 +12,72 @@
             </button>
             <div>
                 <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">{% if is_edit %}Update Info{% else %}New Entry{% endif %}</h3>
-                <h2 class="text-4xl font-black text-white tracking-tight">{% if is_edit %}Edit Route{% else %}Add Route{% endif %}</h2>
+                <h2 class="text-4xl font-black text-white tracking-tight">{% if is_edit %}Edit Route{% else %}Plot Route{% endif %}</h2>
             </div>
-
         </div>
 
-        <div class="bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-            <div class="h-2 w-full bg-gradient-to-r from-blue-600 to-indigo-500"></div>
-            
-            <form class="p-10 space-y-10" hx-post="{% if is_edit %}{% url 'edit_route' route.pk %}{% else %}{% url 'add_route' %}{% endif %}" hx-target="main" hx-push-url="{% url 'routes' %}">
-                {% csrf_token %}
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 min-h-[600px]">
+            <!-- Left: Form -->
+            <div class="bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+                <div class="h-2 w-full bg-gradient-to-r from-blue-600 to-indigo-500 shrink-0"></div>
                 
-                <div>
-                    <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">Route Information</h4>
-                    <div class="space-y-6">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Route Name</label>
-                            {{ form.name }}
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <form class="p-8 space-y-8 flex-1 flex flex-col" hx-post="{% if is_edit %}{% url 'edit_route' route.pk %}{% else %}{% url 'add_route' %}{% endif %}" hx-target="main" hx-push-url="{% url 'routes' %}">
+                    {% csrf_token %}
+                    
+                    <div class="flex-1">
+                        <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">Route Constraints</h4>
+                        <div class="space-y-6">
                             <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Origin</label>
-                                {{ form.origin }}
+                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Route Name</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Origin Node</label>
+                                    {{ form.origin }}
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Destination Node</label>
+                                    {{ form.destination }}
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Calculated Distance (km)</label>
+                                    {{ form.distance_km }}
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Est. Travel Time</label>
+                                    {{ form.est_travel_time }}
+                                </div>
                             </div>
                             <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Destination</label>
-                                {{ form.destination }}
+                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Route Status</label>
+                                {{ form.status }}
                             </div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Distance (km)</label>
-                                {{ form.distance_km }}
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Est. Travel Time</label>
-                                {{ form.est_travel_time }}
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Route Status</label>
-                            {{ form.status }}
+                            <!-- Hidden JSON geographic dumps -->
+                            {{ form.waypoints }}
+                            {{ form.path_coordinates }}
                         </div>
                     </div>
-                </div>
 
-                <div class="pt-6 border-t border-white/10 flex justify-end gap-4">
-                    <button type="button" hx-get="{% url 'routes' %}" hx-target="main" hx-push-url="true" class="px-8 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
-                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">{% if is_edit %}Save Changes{% else %}Save Route{% endif %}</button>
+                    <div class="pt-6 border-t border-white/10 flex justify-end gap-4 shrink-0">
+                        <button type="button" hx-get="{% url 'routes' %}" hx-target="main" hx-push-url="true" class="px-8 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
+                        <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">{% if is_edit %}Save Changes{% else %}Commit Route{% endif %}</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: Interactive Map -->
+            <div class="bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative min-h-[500px]">
+                <div id="route-builder-map" class="absolute inset-0 z-0"></div>
+                <div class="absolute top-6 left-6 right-6 z-[1000] pointer-events-none">
+                    <div class="bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-center shadow-2xl">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-1">Interactive OSRM Plotter</p>
+                        <p class="text-xs font-bold text-white/70">Click to drop Origin & Destination terminals. Pathing calculates automatically.</p>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -71,5 +87,108 @@
     .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    
+    /* Hide the default Leaflet Routing Machine instruction panel since we styled our own */
+    .leaflet-routing-container { display: none !important; }
 </style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<script>
+(function() {
+    function initRouteBuilder() {
+        const el = document.getElementById('route-builder-map');
+        if (!el) return;
+        if (el._leaflet_id && window.routeBuilderMap) { window.routeBuilderMap.invalidateSize(); return; }
+        if (el.offsetWidth === 0 || el.offsetHeight === 0) { requestAnimationFrame(initRouteBuilder); return; }
+
+        const map = L.map(el, { zoomControl: false, attributionControl: false }).setView([14.5995, 120.9842], 12); // Default to Manila
+        window.routeBuilderMap = map;
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 18 }).addTo(map);
+
+        let waypoints = [];
+        let routingControl = null;
+
+        // Input Bindings
+        const wpInput = document.getElementById('route_waypoints_input');
+        const pathInput = document.getElementById('route_path_input');
+        const distInput = document.getElementById('route_distance_input');
+        const timeInput = document.getElementById('route_time_input');
+        const originInput = document.getElementById('route_origin_input');
+        const destInput = document.getElementById('route_destination_input');
+
+        // Initial Data Hydration for Edits
+        if (wpInput.value) {
+            try {
+                const wps = JSON.parse(wpInput.value);
+                waypoints = wps.map(w => L.latLng(w.lat, w.lng));
+                calculateRoute();
+            } catch (e) { console.error("Could not parse initialized route waypoints"); }
+        }
+
+        map.on('click', function(e) {
+            if (waypoints.length >= 2) waypoints = []; // Reset if 2 clicks exist
+            waypoints.push(e.latlng);
+            calculateRoute();
+        });
+
+        function calculateRoute() {
+            if (routingControl) {
+                map.removeControl(routingControl);
+            }
+
+            // Sync visual waypoints to hidden JSON
+            wpInput.value = JSON.stringify(waypoints);
+
+            if (waypoints.length > 0) {
+                // Populate origin/dest with placeholder coordinates if empty, real production may reverse-geocode here.
+                if (waypoints.length === 1) originInput.value = originInput.value || `${waypoints[0].lat.toFixed(4)}, ${waypoints[0].lng.toFixed(4)}`;
+                if (waypoints.length === 2) destInput.value = destInput.value || `${waypoints[1].lat.toFixed(4)}, ${waypoints[1].lng.toFixed(4)}`;
+            }
+
+            if (waypoints.length < 2) {
+                // Just draw a marker if only Origin is set
+                if (waypoints.length === 1) {
+                    L.marker(waypoints[0]).addTo(map);
+                }
+                return;
+            }
+
+            routingControl = L.Routing.control({
+                waypoints: waypoints,
+                router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
+                lineOptions: { styles: [{ color: '#3b82f6', weight: 4, opacity: 0.8 }] },
+                createMarker: function() { return null; }, // We handle basic markers natively or just let routing draw lines
+                fitSelectedRoutes: true,
+                show: false
+            }).addTo(map);
+
+            routingControl.on('routesfound', function(e) {
+                const routes = e.routes;
+                if (routes.length > 0) {
+                    const route = routes[0];
+                    // Strip the full polyline path mapping back into JSON
+                    const coordinates = route.coordinates.map(c => ({ lat: c.lat, lng: c.lng }));
+                    pathInput.value = JSON.stringify(coordinates);
+                    
+                    // Convert measurements to appropriate format
+                    const distKm = (route.summary.totalDistance / 1000).toFixed(2);
+                    const totalSecs = route.summary.totalTime;
+                    const hours = Math.floor(totalSecs / 3600);
+                    const mins = Math.floor((totalSecs % 3600) / 60);
+                    const timeStr = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+
+                    distInput.value = distKm;
+                    timeInput.value = timeStr;
+                }
+            });
+        }
+
+        new ResizeObserver(() => { if (window.routeBuilderMap) window.routeBuilderMap.invalidateSize(); }).observe(el);
+    }
+    setTimeout(initRouteBuilder, 250);
+})();
+</script>
 {% endblock %}

@@ -226,16 +226,36 @@
         if (el._leaflet_id && window.routesMap) { window.routesMap.invalidateSize(); return; }
         if (el.offsetWidth === 0 || el.offsetHeight === 0) { requestAnimationFrame(initRoutesMap); return; }
 
-        const map = L.map(el, { zoomControl: false, attributionControl: false }).setView([11.24, 124.99], 11);
+        const map = L.map(el, { zoomControl: false, attributionControl: false }).setView([14.5995, 120.9842], 11);
         window.routesMap = map;
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 17 }).addTo(map);
 
-        // Sample route polylines
+        // Render saved backend route paths directly parsing static structural caches
         const routes = [];
+        {% for route in routes %}
+            {% if route.path_coordinates %}
+            try {
+                routes.push({
+                    points: {{ route.path_json|safe }},
+                    color: '{% if route.status == "Active" %}#3b82f6{% elif route.status == "Delayed" %}#f59e0b{% else %}#ffffff{% endif %}'
+                });
+            } catch(e) {}
+            {% endif %}
+        {% endfor %}
+
         routes.forEach(r => {
-            L.polyline(r.points, { color: r.color, weight: 3, opacity: 0.8, dashArray: '8 4' }).addTo(map);
+            if (r.points && r.points.length > 0) {
+                L.polyline(r.points, { color: r.color, weight: 4, opacity: 0.8 }).addTo(map);
+            }
         });
+
+        if (routes.length > 0) {
+            const allPoints = routes.flatMap(r => r.points).filter(p => p && (p.lat || p[0]));
+            if (allPoints.length > 0) {
+                map.fitBounds(allPoints, { padding: [50, 50] });
+            }
+        }
 
         new ResizeObserver(() => { if (window.routesMap) window.routesMap.invalidateSize(); }).observe(el);
     }
