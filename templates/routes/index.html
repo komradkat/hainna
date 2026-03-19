@@ -64,7 +64,7 @@
                 <div class="px-4 py-4 border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer group transition-colors">
                     <div class="flex items-start justify-between mb-2">
                         <div>
-                            <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-0.5">{{ route.id }}</p>
+                            <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-0.5">RTE-{{ route.pk|stringformat:"03d" }}</p>
                             <h4 class="text-sm font-black text-white group-hover:text-blue-400 transition-colors">{{ route.name }}</h4>
                         </div>
                         <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/10 bg-black/40">
@@ -84,9 +84,12 @@
                         <span>{{ route.destination }}</span>
                     </div>
                     <div class="flex items-center gap-4 mt-2">
-                        <span class="text-[9px] font-bold text-white/20">{{ route.distance }}</span>
-                        <span class="text-[9px] font-bold text-white/20">~{{ route.est_time }}</span>
-                        <span class="text-[9px] font-bold text-blue-500/60 ml-auto">{{ route.active_units }} units</span>
+                        <span class="text-[9px] font-bold text-white/20">{{ route.distance_km }} km</span>
+                        <span class="text-[9px] font-bold text-white/20">~{{ route.est_travel_time }}</span>
+                        <div class="flex items-center gap-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button hx-get="{% url 'edit_route' route.pk %}" hx-target="main" hx-push-url="true" class="text-[10px] font-black uppercase tracking-widest text-blue-500/60 hover:text-blue-400">Edit</button>
+                            <button hx-delete="{% url 'delete_route' route.pk %}" hx-confirm="Delete route {{ route.name }}?" class="text-[10px] font-black uppercase tracking-widest text-red-500/60 hover:text-red-400">Delete</button>
+                        </div>
                     </div>
                 </div>
                 {% empty %}
@@ -151,14 +154,14 @@
                 <div class="p-6">
                     <div class="flex items-start justify-between mb-4">
                         <div>
-                            <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">{{ zone.id }}</p>
+                            <p class="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">ZNE-{{ zone.pk|stringformat:"03d" }}</p>
                             <h3 class="text-lg font-black text-white group-hover:text-blue-400 transition-colors">{{ zone.name }}</h3>
-                            <p class="text-[10px] font-bold text-white/30 mt-0.5">{{ zone.type }}</p>
+                            <p class="text-[10px] font-bold text-white/30 mt-0.5">{{ zone.zone_type }}</p>
                         </div>
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: {{ zone.color }}20; border: 1px solid {{ zone.color }}40">
-                            {% if zone.type == 'Delivery Hub' %}
+                            {% if zone.zone_type == 'Delivery Hub' %}
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ zone.color }}" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            {% elif zone.type == 'Restricted' %}
+                            {% elif zone.zone_type == 'Restricted' %}
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ zone.color }}" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
                             {% else %}
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ zone.color }}" stroke-width="2.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
@@ -169,21 +172,21 @@
                     <div class="space-y-2">
                         <div class="flex justify-between items-center text-[11px] p-2 rounded-lg bg-white/[0.02] border border-white/5">
                             <span class="font-bold text-white/30">Units Inside</span>
-                            <span class="font-black text-white">{{ zone.units_inside }}</span>
+                            <span class="font-black text-white">0</span>
                         </div>
                         <div class="flex justify-between items-center text-[11px] p-2 rounded-lg bg-white/[0.02] border border-white/5">
-                            <span class="font-bold text-white/30">Coverage Radius</span>
-                            <span class="font-black text-white">{{ zone.radius }}</span>
+                            <span class="font-bold text-white/30">Coverage Area</span>
+                            <span class="font-black text-white">N/A</span>
                         </div>
                         <div class="flex justify-between items-center text-[11px] p-2 rounded-lg bg-white/[0.02] border border-white/5">
                             <span class="font-bold text-white/30">Alert Triggers</span>
-                            <span class="font-black {% if zone.alerts > 0 %}text-amber-400{% else %}text-white{% endif %}">{{ zone.alerts }} today</span>
+                            <span class="font-black text-white">0 today</span>
                         </div>
                     </div>
 
                     <div class="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
                         <div class="flex items-center gap-1.5">
-                            {% if zone.active %}
+                            {% if zone.is_active %}
                                 <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
                                 <span class="text-[9px] font-black uppercase tracking-widest text-emerald-500/70">Active</span>
                             {% else %}
@@ -191,10 +194,13 @@
                                 <span class="text-[9px] font-black uppercase tracking-widest text-white/30">Inactive</span>
                             {% endif %}
                         </div>
-                        <button class="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-colors flex items-center gap-1.5">
-                            Edit Zone
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                        </button>
+                        <div class="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button hx-delete="{% url 'delete_zone' zone.pk %}" hx-confirm="Delete zone {{ zone.name }}?" class="text-[10px] font-black uppercase tracking-widest text-red-500/30 hover:text-red-400">Delete</button>
+                            <button hx-get="{% url 'edit_zone' zone.pk %}" hx-target="main" hx-push-url="true" class="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white flex items-center gap-1.5">
+                                Edit
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

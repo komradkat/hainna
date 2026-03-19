@@ -16,9 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import DashboardView, LiveTrackingView, RoutesView, AddRouteView, AddZoneView, SchedulesView, AddScheduleView, FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, AddPersonnelView, system_status
+from .views import DashboardView, LiveTrackingView, SchedulesView, AddScheduleView, FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, AddPersonnelView, system_status
 from users.views import UserManagementView, AddUserView, EditUserView, DeleteUserView, ChangePasswordView
-from fleet.views import FleetVehiclesView, AddVehicleView, EditVehicleView, DeleteVehicleView, DriversView, AddDriverView, EditDriverView, DeleteDriverView, ServiceLogsView, AddServiceLogView, EditServiceLogView, DeleteServiceLogView
+from fleet.views import FleetVehiclesView, AddVehicleView, EditVehicleView, DeleteVehicleView, DriversView, AddDriverView, EditDriverView, DeleteDriverView, ServiceLogsView, AddServiceLogView, EditServiceLogView, DeleteServiceLogView, RoutesView, AddRouteView, EditRouteView, DeleteRouteView, AddZoneView, EditZoneView, DeleteZoneView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,7 +34,11 @@ urlpatterns = [
     path('fleet/drivers/delete/<int:pk>/', DeleteDriverView.as_view(), name='delete_driver'),
     path('fleet/routes/', RoutesView.as_view(), name='routes'),
     path('fleet/routes/add/', AddRouteView.as_view(), name='add_route'),
+    path('fleet/routes/edit/<int:pk>/', EditRouteView.as_view(), name='edit_route'),
+    path('fleet/routes/delete/<int:pk>/', DeleteRouteView.as_view(), name='delete_route'),
     path('fleet/zones/add/', AddZoneView.as_view(), name='add_zone'),
+    path('fleet/zones/edit/<int:pk>/', EditZoneView.as_view(), name='edit_zone'),
+    path('fleet/zones/delete/<int:pk>/', DeleteZoneView.as_view(), name='delete_zone'),
     path('schedules/', SchedulesView.as_view(), name='schedules'),
     path('schedules/add/', AddScheduleView.as_view(), name='add_schedule'),
     path('fleet/service-logs/', ServiceLogsView.as_view(), name='service_logs'),

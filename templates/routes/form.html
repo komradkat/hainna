@@ -11,15 +11,16 @@
                 Back to Directory
             </button>
             <div>
-                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">New Entry</h3>
-                <h2 class="text-4xl font-black text-white tracking-tight">Add Route</h2>
+                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2">{% if is_edit %}Update Info{% else %}New Entry{% endif %}</h3>
+                <h2 class="text-4xl font-black text-white tracking-tight">{% if is_edit %}Edit Route{% else %}Add Route{% endif %}</h2>
             </div>
+
         </div>
 
         <div class="bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
             <div class="h-2 w-full bg-gradient-to-r from-blue-600 to-indigo-500"></div>
             
-            <form class="p-10 space-y-10" hx-post="{% url 'add_route' %}" hx-target="main" hx-push-url="{% url 'routes' %}">
+            <form class="p-10 space-y-10" hx-post="{% if is_edit %}{% url 'edit_route' route.pk %}{% else %}{% url 'add_route' %}{% endif %}" hx-target="main" hx-push-url="{% url 'routes' %}">
                 {% csrf_token %}
                 
                 <div>
@@ -27,34 +28,38 @@
                     <div class="space-y-6">
                         <div class="space-y-2">
                             <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Route Name</label>
-                            <input type="text" placeholder="e.g. Manila – North Port Express" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                            {{ form.name }}
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Origin</label>
-                                <input type="text" placeholder="e.g. Manila Hub" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                                {{ form.origin }}
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Destination</label>
-                                <input type="text" placeholder="e.g. North Port" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                                {{ form.destination }}
                             </div>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Distance (km)</label>
-                                <input type="number" placeholder="e.g. 45" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                                {{ form.distance_km }}
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Est. Travel Time</label>
-                                <input type="text" placeholder="e.g. 1h 30m" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all">
+                                {{ form.est_travel_time }}
                             </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Route Status</label>
+                            {{ form.status }}
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-6 border-t border-white/10 flex justify-end gap-4">
                     <button type="button" hx-get="{% url 'routes' %}" hx-target="main" hx-push-url="true" class="px-8 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
-                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">Save Route</button>
+                    <button type="submit" class="px-12 py-4 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-all">{% if is_edit %}Save Changes{% else %}Save Route{% endif %}</button>
                 </div>
             </form>
         </div>

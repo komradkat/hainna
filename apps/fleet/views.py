@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, View
 from core.views import HtmxTemplateMixin
-from .models import Vehicle, Driver, MaintenanceLog
-from .forms import VehicleForm, DriverForm, ServiceLogForm
+from .models import Vehicle, Driver, MaintenanceLog, Route, Zone
+from .forms import VehicleForm, DriverForm, ServiceLogForm, RouteForm, ZoneForm
 
 class FleetVehiclesView(HtmxTemplateMixin, TemplateView):
     template_name = 'fleet/index.html'
@@ -231,6 +231,161 @@ class DeleteServiceLogView(View):
         log.delete()
         
         list_view = ServiceLogsView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
+
+class RoutesView(HtmxTemplateMixin, TemplateView):
+    template_name = 'routes/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['routes'] = Route.objects.all().order_by('-date_added')
+        
+        from django.db.models import Sum
+        total_km = Route.objects.aggregate(Sum('distance_km'))['distance_km__sum'] or 0
+
+        context['route_stats'] = {
+            'total': Route.objects.count(),
+            'active': Route.objects.filter(status='Active').count(),
+            'total_km': f"{total_km} km",
+            'units_on_route': 0,
+            'avg_time': '0h 0m'
+        }
+        
+        context['zones'] = Zone.objects.all().order_by('-date_added')
+        context['zone_stats'] = {
+            'total': Zone.objects.count(),
+            'active': Zone.objects.count(),
+            'units_inside': 0,
+            'alerts': 0
+        }
+        return context
+
+class AddRouteView(HtmxTemplateMixin, TemplateView):
+    template_name = 'routes/form.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = RouteForm()
+        context['is_edit'] = False
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = RouteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            list_view = RoutesView()
+            list_view.request = request
+            list_view.kwargs = kwargs
+            list_view.args = args
+            return list_view.get(request, *args, **kwargs)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'is_edit': False,
+            'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+        })
+
+class EditRouteView(HtmxTemplateMixin, TemplateView):
+    template_name = 'routes/form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        route = get_object_or_404(Route, pk=self.kwargs.get('pk'))
+        context['form'] = RouteForm(instance=route)
+        context['is_edit'] = True
+        context['route'] = route
+        return context
+
+    def post(self, request, *args, **kwargs):
+        route = get_object_or_404(Route, pk=self.kwargs.get('pk'))
+        form = RouteForm(request.POST, instance=route)
+        if form.is_valid():
+            form.save()
+            list_view = RoutesView()
+            list_view.request = request
+            list_view.kwargs = kwargs
+            list_view.args = args
+            return list_view.get(request, *args, **kwargs)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'is_edit': True,
+            'route': route,
+            'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+        })
+
+class DeleteRouteView(View):
+    def delete(self, request, *args, **kwargs):
+        route = get_object_or_404(Route, pk=self.kwargs.get('pk'))
+        route.delete()
+        list_view = RoutesView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
+
+class AddZoneView(HtmxTemplateMixin, TemplateView):
+    template_name = 'routes/zone_form.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = ZoneForm()
+        context['is_edit'] = False
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = ZoneForm(request.POST)
+        if form.is_valid():
+            form.save()
+            list_view = RoutesView()
+            list_view.request = request
+            list_view.kwargs = kwargs
+            list_view.args = args
+            return list_view.get(request, *args, **kwargs)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'is_edit': False,
+            'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+        })
+
+class EditZoneView(HtmxTemplateMixin, TemplateView):
+    template_name = 'routes/zone_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        zone = get_object_or_404(Zone, pk=self.kwargs.get('pk'))
+        context['form'] = ZoneForm(instance=zone)
+        context['is_edit'] = True
+        context['zone'] = zone
+        return context
+
+    def post(self, request, *args, **kwargs):
+        zone = get_object_or_404(Zone, pk=self.kwargs.get('pk'))
+        form = ZoneForm(request.POST, instance=zone)
+        if form.is_valid():
+            form.save()
+            list_view = RoutesView()
+            list_view.request = request
+            list_view.kwargs = kwargs
+            list_view.args = args
+            return list_view.get(request, *args, **kwargs)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'is_edit': True,
+            'zone': zone,
+            'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+        })
+
+class DeleteZoneView(View):
+    def delete(self, request, *args, **kwargs):
+        zone = get_object_or_404(Zone, pk=self.kwargs.get('pk'))
+        zone.delete()
+        list_view = RoutesView()
         list_view.request = request
         list_view.kwargs = kwargs
         list_view.args = args

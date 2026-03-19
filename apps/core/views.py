@@ -35,36 +35,6 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
 
 
 
-class RoutesView(HtmxTemplateMixin, TemplateView):
-    template_name = 'routes/index.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['routes'] = []
-        context['route_stats'] = {'total': 0, 'active': 0, 'total_km': '0 km', 'units_on_route': 0, 'avg_time': '0h 0m'}
-        context['zones'] = []
-        context['zone_stats'] = {'total': 0, 'active': 0, 'units_inside': 0, 'alerts': 0}
-        return context
-
-class AddRouteView(HtmxTemplateMixin, TemplateView):
-    template_name = 'routes/form.html'
-    
-    def post(self, request, *args, **kwargs):
-        list_view = RoutesView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
-
-class AddZoneView(HtmxTemplateMixin, TemplateView):
-    template_name = 'routes/zone_form.html'
-    
-    def post(self, request, *args, **kwargs):
-        list_view = RoutesView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
 
 def system_status(request):
     now = datetime.datetime.now().strftime("%H:%M:%S")

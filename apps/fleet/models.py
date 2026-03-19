@@ -83,3 +83,52 @@ class MaintenanceLog(models.Model):
 
     def __str__(self):
         return f"{self.service_type} - {self.vehicle.plate_number} ({self.date})"
+
+class Route(models.Model):
+    STATUS_CHOICES = [
+        ('Active', 'Active'),
+        ('Inactive', 'Inactive'),
+        ('Delayed', 'Delayed'),
+    ]
+
+    name = models.CharField(max_length=100)
+    origin = models.CharField(max_length=100)
+    destination = models.CharField(max_length=100)
+    distance_km = models.DecimalField(max_digits=10, decimal_places=2)
+    est_travel_time = models.CharField(max_length=50)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
+
+    date_added = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.origin} - {self.destination})"
+
+class Zone(models.Model):
+    TYPE_CHOICES = [
+        ('Delivery Hub', 'Delivery Hub'),
+        ('Restricted', 'Restricted'),
+        ('Waypoint', 'Waypoint'),
+    ]
+
+    name = models.CharField(max_length=100)
+    zone_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    coordinates = models.TextField()
+    
+    date_added = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.zone_type})"
+
+    @property
+    def color(self):
+        if self.zone_type == 'Delivery Hub':
+            return '#10b981'
+        elif self.zone_type == 'Restricted':
+            return '#ef4444'
+        return '#3b82f6'
+    
+    @property
+    def is_active(self):
+        return True
