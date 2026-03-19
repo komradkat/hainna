@@ -62,13 +62,24 @@ def issue_ticket(request):
             status='Waiting'
         )
         
-        return HttpResponse(f"""
-            <div class='text-emerald-500 font-bold p-3 bg-emerald-500/10 rounded-lg'>
-                Success! Ticket ID #{ticket.id} assigned to Seat {seat_number}.
-            </div>
-            <script>setTimeout(() => window.location.reload(), 1500);</script>
-        """)
+        return redirect(request.META.get('HTTP_REFERER', 'booking:dispatch'))
     return HttpResponse("Invalid Request")
+
+class PublicBoardView(TemplateView):
+    template_name = 'booking/public_board.html'
+
+def public_board_feed(request):
+    trips = Trip.objects.filter(status__in=['Pending Vehicle', 'Standing By', 'Loading']).order_by('-last_updated')
+    
+    loading = trips.filter(status='Loading')
+    standing_by = trips.filter(status='Standing By')
+    arriving = trips.filter(status='Pending Vehicle')
+    
+    return render(request, 'booking/partials/board_feed.html', {
+        'loading': loading,
+        'standing_by': standing_by,
+        'arriving': arriving
+    })
 
 class DispatchBoardView(HtmxTemplateMixin, TemplateView):
     template_name = 'booking/dispatch.html'

@@ -10,4 +10,6 @@ urlpatterns = [
     
     path('dispatch/', views.DispatchBoardView.as_view(), name='dispatch'),
     path('dispatch/update/<int:trip_id>/', views.update_trip_status, name='update_trip_status'),
+    path('board/', views.PublicBoardView.as_view(), name='public_board'),
+    path('board/feed/', views.public_board_feed, name='public_board_feed'),
 ]

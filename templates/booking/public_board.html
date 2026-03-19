@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Departures</title>
+    <!-- Tailwind / DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #050505; color: white; overflow: hidden; }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col bg-black">
+    <!-- Header -->
+    <header class="p-8 border-b border-white/10 flex justify-between items-center shrink-0 bg-base-300">
+        <div>
+            <h1 class="text-[5rem] leading-none font-black uppercase tracking-tighter text-white">DEPARTURES</h1>
+            <p class="text-3xl font-bold tracking-widest text-emerald-500 mt-2 uppercase">HainNa Terminal Operations</p>
+        </div>
+        <div class="text-right flex flex-col items-end">
+            <div id="clock" class="text-[6rem] leading-none font-black tracking-tighter text-white/90"></div>
+            <script>
+                function updateTime() { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); }
+                setInterval(updateTime, 1000); updateTime();
+            </script>
+        </div>
+    </header>
+
+    <!-- Content Feed (HTMX Polled every 5 seconds) -->
+    <main class="flex-1 overflow-hidden relative p-8" hx-get="{% url 'booking:public_board_feed' %}" hx-trigger="load, every 5s" hx-swap="innerHTML">
+        <div class="absolute inset-0 flex items-center justify-center">
+            <span class="loading loading-spinner w-32 h-32 text-white/20"></span>
+        </div>
+    </main>
+</body>
+</html>
