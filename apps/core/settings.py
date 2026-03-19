@@ -17,11 +17,14 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 env = environ.Env(
     DEBUG=(bool, False),
     PRODUCTION=(bool, False),
+    SECRET_KEY=(str, None),
+    ALLOWED_HOSTS=(list, []),
     CSRF_TRUSTED_ORIGINS=(list, []),
     SECURE_SSL_REDIRECT=(bool, False),
     SESSION_COOKIE_SECURE=(bool, False),
     CSRF_COOKIE_SECURE=(bool, False),
     SECURE_HSTS_SECONDS=(int, 0),
+    USE_X_FORWARDED_HOST=(bool, True),
 )
 
 # Reading .env file
@@ -140,6 +143,10 @@ SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', default=PRODUCTION)
 SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE', default=PRODUCTION)
 CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE', default=PRODUCTION)
 SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=31536000 if PRODUCTION else 0)
+
+# Proxy Headers (Required for HTTPS detection behind a load balancer/proxy)
+SECURE_PROXY_SSL_HEADER = env.tuple('SECURE_PROXY_SSL_HEADER', default=('HTTP_X_FORWARDED_PROTO', 'https'))
+USE_X_FORWARDED_HOST = env.bool('USE_X_FORWARDED_HOST', default=True)
 
 if PRODUCTION:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True

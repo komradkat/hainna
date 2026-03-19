@@ -36,6 +36,8 @@ ENV SECURE_SSL_REDIRECT=False
 ENV SESSION_COOKIE_SECURE=False
 ENV CSRF_COOKIE_SECURE=False
 ENV SECURE_HSTS_SECONDS=0
+ENV SECURE_PROXY_SSL_HEADER="HTTP_X_FORWARDED_PROTO,https"
+ENV USE_X_FORWARDED_HOST=True
 
 # Collect static files (requires standard dummy env vars if they aren't provided)
 # Note: In a real deploy, you'd provide real env vars or skip this until runtime.
