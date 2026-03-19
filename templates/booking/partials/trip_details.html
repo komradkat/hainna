@@ -1,0 +1,83 @@
+<div class="h-full flex flex-col animate-fade-in relative z-10 bg-base-200">
+    <!-- Header Context -->
+    <div class="p-6 border-b border-white/5 bg-base-300/20 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20" style="background-color: {{ trip.ticket_color|lower|default:'#3b82f6' }}"></div>
+        
+        <div class="flex justify-between items-start mb-1 relative z-10">
+            <h2 class="text-xl font-black tracking-tighter text-white">{{ trip.route.name }}</h2>
+            <div class="flex flex-col items-end">
+                <span class="text-2xl font-black text-white/90">{{ available_count }}</span>
+                <span class="text-[9px] font-black uppercase tracking-widest text-emerald-500">Seats Open</span>
+            </div>
+        </div>
+        <p class="text-xs font-bold text-white/40 uppercase tracking-widest z-10 relative">Color Matrix: <span class="text-white/80" style="color: {{ trip.ticket_color|lower|default:'#3b82f6' }}">{{ trip.ticket_color }}</span></p>
+    </div>
+
+    <!-- Booking Map Constraints -->
+    <div class="flex-1 p-6 overflow-y-auto custom-scrollbar" x-data="{ selectedSeat: null, passengerName: '' }">
+        
+        <!-- Seat Map Output -->
+        <div class="mb-6 mb-8">
+            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-base-content/30 mb-4">2. Select Seat Mapping</h3>
+            
+            <div class="flex flex-wrap gap-2">
+                {% for seat in seats %}
+                    {% if seat.is_taken %}
+                        <div class="w-10 h-10 shrink-0 bg-base-300 border border-white/5 rounded-md flex items-center justify-center opacity-50 cursor-not-allowed group relative">
+                            <span class="font-black text-xs text-red-500/50 group-hover:hidden">{{ seat.number }}</span>
+                            <span class="font-black text-[7px] text-red-500/50 uppercase tracking-tighter hidden group-hover:block">Taken</span>
+                        </div>
+                    {% else %}
+                        <div class="w-10 h-10 shrink-0 bg-base-300 border border-white/10 rounded-md flex items-center justify-center cursor-pointer hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-colors"
+                             :class="{ 'border-emerald-500 bg-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]': selectedSeat === '{{ seat.number }}' }"
+                             @click="selectedSeat = '{{ seat.number }}'">
+                            <span class="font-black text-[13px] text-white/70" :class="{ 'text-emerald-500': selectedSeat === '{{ seat.number }}' }">{{ seat.number }}</span>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Form Binding Payload -->
+        <div class="bg-base-300/40 border border-white/5 p-5 rounded-2xl" id="ticketing-form-container">
+            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-4 flex items-center gap-2">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line>
+                </svg>
+                3. Finalize Manifest
+            </h3>
+            
+            <form hx-post="{% url 'booking:issue_ticket' %}" hx-target="#booking-response">
+                {% csrf_token %}
+                <input type="hidden" name="trip_id" value="{{ trip.id }}">
+                <input type="hidden" name="seat_number" :value="selectedSeat">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-control w-full">
+                        <label class="label pt-0 pb-1">
+                            <span class="label-text text-[10px] font-bold text-white/50 uppercase tracking-widest">Target Seat</span>
+                        </label>
+                        <input type="text" readonly name="seat_number_display" :value="selectedSeat || 'Select a seat above'" class="input input-sm border-white/10 bg-base-100/50 font-black tracking-widest h-10 w-full" :class="{ 'text-emerald-500': selectedSeat }" required />
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label pt-0 pb-1">
+                            <span class="label-text text-[10px] font-bold text-white/50 uppercase tracking-widest">Passenger Name</span>
+                            <span class="label-text text-[9px] font-bold text-white/20 uppercase tracking-widest">Optional</span>
+                        </label>
+                        <input type="text" name="passenger_name" x-model="passengerName" placeholder="Walk-in Guest" class="input input-sm border-white/10 bg-base-100 focus:bg-white/5 font-bold tracking-wide h-10 w-full" autocomplete="off" />
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-3">
+                    <button type="submit" class="btn btn-sm h-12 border-0 bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white font-black uppercase tracking-widest w-full transition-all" :disabled="!selectedSeat">
+                        Issue Formal Ticket (₱150.00)
+                    </button>
+                    <!-- Response UI Constraint Handler -->
+                    <div id="booking-response" class="w-full"></div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
