@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.views import LoginView, LogoutView
-from .views import DashboardView, LiveTrackingView, SchedulesView, AddScheduleView, FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, AddPersonnelView, system_status, tracking_positions
+from .views import DashboardView, LiveTrackingView, SchedulesView, AddScheduleView, FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, AddPersonnelView, system_status, tracking_positions, LoginLoadingView
 from users.views import UserManagementView, AddUserView, EditUserView, DeleteUserView, ChangePasswordView
 from fleet.views import FleetVehiclesView, AddVehicleView, EditVehicleView, DeleteVehicleView, DriversView, AddDriverView, EditDriverView, DeleteDriverView, ServiceLogsView, AddServiceLogView, EditServiceLogView, DeleteServiceLogView, RoutesView, AddRouteView, EditRouteView, DeleteRouteView, AddZoneView, EditZoneView, DeleteZoneView
 
@@ -26,6 +26,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', LogoutView.as_view(next_page='/login/'), name='logout'),
     path('', DashboardView.as_view(), name='dashboard'),
+    path('loading/', LoginLoadingView.as_view(), name='loading_screen'),
     path('live-tracking/', LiveTrackingView.as_view(), name='live_tracking'),
     path('live-tracking/positions/', tracking_positions, name='tracking_positions'),
     path('fleet/vehicles/', FleetVehiclesView.as_view(), name='fleet_vehicles'),

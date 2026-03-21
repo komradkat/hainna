@@ -26,6 +26,9 @@ class DashboardView(HtmxTemplateMixin, TemplateView):
         context['vehicles'] = []
         return context
 
+class LoginLoadingView(LoginRequiredMixin, TemplateView):
+    template_name = 'users/loading.html'
+
 class LiveTrackingView(HtmxTemplateMixin, TemplateView):
     template_name = 'tracking/index.html'
 

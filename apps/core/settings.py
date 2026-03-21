@@ -126,7 +126,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomUser'
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_REDIRECT_URL = 'loading_screen'
 LOGOUT_REDIRECT_URL = 'login'
 
 # Sessions — expire after 8 hours or on browser close (important for shared cashier terminals)
