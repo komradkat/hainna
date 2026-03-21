@@ -35,46 +35,27 @@ class LiveTrackingView(HtmxTemplateMixin, TemplateView):
         
         context = super().get_context_data(**kwargs)
         
-        # Pull live positions from Traccar (graceful fallback to empty)
-        positions = traccar.get_all_positions()
-        traccar_ok = traccar.is_connected()
-        
         vehicles = Vehicle.objects.filter(
             traccar_device_id__isnull=False
         ).exclude(traccar_device_id='').select_related('driver')
+
+        # Move live position fetching to the background (polled via JSON)
+        # to prevent page hang on initial load.
+        context['units'] = [{
+            'id': v.plate_number,
+            'vehicle_id': v.id,
+            'name': str(v.driver) if v.driver else 'Unassigned',
+            'plate': v.plate_number,
+            'status': 'Offline', # Initially offline until first set of data arrives
+            'speed': 'N/A',
+            'lat': None,
+            'lng': None,
+            'pos': '[0, 0]',
+            'battery': 'N/A',
+            'has_gps': False,
+        } for v in vehicles]
         
-        units = []
-        for v in vehicles:
-            pos_data = positions.get(str(v.traccar_device_id), {})
-            lat = pos_data.get('lat')
-            lng = pos_data.get('lng')
-            speed = pos_data.get('speed', 0)
-            
-            if speed > 5:
-                status = 'Moving'
-            elif speed > 0:
-                status = 'Idle'
-            else:
-                status = 'Stopped'
-                
-            driver_name = str(v.driver) if v.driver else 'Unassigned'
-            
-            units.append({
-                'id': v.plate_number,
-                'vehicle_id': v.id,
-                'name': driver_name,
-                'plate': v.plate_number,
-                'status': status if lat else 'Offline',
-                'speed': f"{speed:.1f} km/h" if lat else 'N/A',
-                'lat': lat,
-                'lng': lng,
-                'pos': f"[{lat}, {lng}]" if lat else '[0, 0]',
-                'battery': 'N/A',
-                'has_gps': bool(lat),
-            })
-        
-        context['units'] = units
-        context['traccar_ok'] = traccar_ok
+        context['traccar_ok'] = True # Assume OK until background poll proves otherwise
         context['traccar_url'] = self.request.build_absolute_uri('/live-tracking/positions/')
         return context
 

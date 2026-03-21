@@ -530,11 +530,26 @@
 
         // Initial launch with a safety delay for HTMX settle
         setTimeout(initMap, 250);
+
         // Start polling loop
         setTimeout(() => {
+            // Clear any existing interval to prevent lag/duplicates
+            if (window.trackingInterval) {
+                clearInterval(window.trackingInterval);
+            }
+            
             pollPositions();
-            setInterval(pollPositions, 5000);
-        }, 3000);
+            window.trackingInterval = setInterval(pollPositions, 5000);
+            
+            // Cleanup: Clear interval when navigating away via HTMX
+            document.addEventListener('htmx:beforeSwap', function cleanup(evt) {
+                if (window.trackingInterval) {
+                    clearInterval(window.trackingInterval);
+                    window.trackingInterval = null;
+                }
+                document.removeEventListener('htmx:beforeSwap', cleanup);
+            });
+        }, 500);
     })();
 </script>
 {% endblock %}

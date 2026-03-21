@@ -8,7 +8,11 @@ import urllib.request
 import urllib.error
 import json
 import base64
+import logging
 from django.conf import settings
+from django.core.cache import cache
+
+logger = logging.getLogger(__name__)
 
 
 def _get_headers():
@@ -22,12 +26,20 @@ def _get_headers():
 
 def _fetch(endpoint):
     """Make a GET request to the Traccar API. Returns parsed JSON or None on failure."""
+    cache_key = f"traccar_api_{endpoint}"
+    cached_data = cache.get(cache_key)
+    if cached_data is not None:
+        return cached_data
+
     url = f"{settings.TRACCAR_URL.rstrip('/')}/api/{endpoint}"
     req = urllib.request.Request(url, headers=_get_headers())
     try:
         with urllib.request.urlopen(req, timeout=5) as response:
-            return json.loads(response.read().decode())
-    except Exception:
+            data = json.loads(response.read().decode())
+            cache.set(cache_key, data, timeout=2)  # Cache for 2 seconds
+            return data
+    except Exception as e:
+        logger.warning(f"Traccar API error on {endpoint}: {e}")
         return None
 
 
