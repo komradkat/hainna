@@ -26,11 +26,9 @@ class AddVehicleView(HtmxTemplateMixin, TemplateView):
         form = VehicleForm(request.POST)
         if form.is_valid():
             form.save()
-            list_view = FleetVehiclesView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'fleetChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -54,11 +52,9 @@ class EditVehicleView(HtmxTemplateMixin, TemplateView):
         form = VehicleForm(request.POST, instance=vehicle)
         if form.is_valid():
             form.save()
-            list_view = FleetVehiclesView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'fleetChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -71,12 +67,9 @@ class DeleteVehicleView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         vehicle = get_object_or_404(Vehicle, pk=self.kwargs.get('pk'))
         vehicle.delete()
-        
-        list_view = FleetVehiclesView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
+        response = render(request, 'partials/empty.html')
+        response['HX-Trigger'] = 'fleetChanged'
+        return response
 
 class DriversView(HtmxTemplateMixin, TemplateView):
     template_name = 'drivers/index.html'
@@ -105,11 +98,9 @@ class AddDriverView(HtmxTemplateMixin, TemplateView):
         form = DriverForm(request.POST)
         if form.is_valid():
             form.save()
-            list_view = DriversView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'driversChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -133,11 +124,9 @@ class EditDriverView(HtmxTemplateMixin, TemplateView):
         form = DriverForm(request.POST, instance=driver)
         if form.is_valid():
             form.save()
-            list_view = DriversView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'driversChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -150,12 +139,9 @@ class DeleteDriverView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         driver = get_object_or_404(Driver, pk=self.kwargs.get('pk'))
         driver.delete()
-        
-        list_view = DriversView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
+        response = render(request, 'partials/empty.html')
+        response['HX-Trigger'] = 'driversChanged'
+        return response
 
 class ServiceLogsView(HtmxTemplateMixin, TemplateView):
     template_name = 'service_logs/index.html'
@@ -185,11 +171,9 @@ class AddServiceLogView(HtmxTemplateMixin, TemplateView):
         form = ServiceLogForm(request.POST)
         if form.is_valid():
             form.save()
-            list_view = ServiceLogsView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'serviceLogsChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -213,11 +197,9 @@ class EditServiceLogView(HtmxTemplateMixin, TemplateView):
         form = ServiceLogForm(request.POST, instance=log)
         if form.is_valid():
             form.save()
-            list_view = ServiceLogsView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'serviceLogsChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -230,12 +212,9 @@ class DeleteServiceLogView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         log = get_object_or_404(MaintenanceLog, pk=self.kwargs.get('pk'))
         log.delete()
-        
-        list_view = ServiceLogsView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
+        response = render(request, 'partials/empty.html')
+        response['HX-Trigger'] = 'serviceLogsChanged'
+        return response
 
 class RoutesView(HtmxTemplateMixin, TemplateView):
     template_name = 'routes/index.html'
@@ -277,11 +256,9 @@ class AddRouteView(HtmxTemplateMixin, TemplateView):
         form = RouteForm(request.POST)
         if form.is_valid():
             form.save()
-            list_view = RoutesView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'routesChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -305,11 +282,9 @@ class EditRouteView(HtmxTemplateMixin, TemplateView):
         form = RouteForm(request.POST, instance=route)
         if form.is_valid():
             form.save()
-            list_view = RoutesView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'routesChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -322,11 +297,9 @@ class DeleteRouteView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         route = get_object_or_404(Route, pk=self.kwargs.get('pk'))
         route.delete()
-        list_view = RoutesView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
+        response = render(request, 'partials/empty.html')
+        response['HX-Trigger'] = 'routesChanged'
+        return response
 
 class AddZoneView(HtmxTemplateMixin, TemplateView):
     template_name = 'routes/zone_form.html'
@@ -341,11 +314,9 @@ class AddZoneView(HtmxTemplateMixin, TemplateView):
         form = ZoneForm(request.POST)
         if form.is_valid():
             form.save()
-            list_view = RoutesView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'routesChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -369,11 +340,9 @@ class EditZoneView(HtmxTemplateMixin, TemplateView):
         form = ZoneForm(request.POST, instance=zone)
         if form.is_valid():
             form.save()
-            list_view = RoutesView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'routesChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -386,11 +355,9 @@ class DeleteZoneView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         zone = get_object_or_404(Zone, pk=self.kwargs.get('pk'))
         zone.delete()
-        list_view = RoutesView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
+        response = render(request, 'partials/empty.html')
+        response['HX-Trigger'] = 'routesChanged'
+        return response
 
 class TerminalsView(HtmxTemplateMixin, TemplateView):
     template_name = 'terminals/index.html'
@@ -416,11 +383,9 @@ class AddTerminalView(HtmxTemplateMixin, TemplateView):
         form = TerminalForm(request.POST)
         if form.is_valid():
             form.save()
-            list_view = TerminalsView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'terminalsChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -444,11 +409,9 @@ class EditTerminalView(HtmxTemplateMixin, TemplateView):
         form = TerminalForm(request.POST, instance=terminal)
         if form.is_valid():
             form.save()
-            list_view = TerminalsView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'terminalsChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
@@ -461,8 +424,6 @@ class DeleteTerminalView(LoginRequiredMixin, View):
     def delete(self, request, *args, **kwargs):
         terminal = get_object_or_404(Terminal, pk=self.kwargs.get('pk'))
         terminal.delete()
-        list_view = TerminalsView()
-        list_view.request = request
-        list_view.kwargs = kwargs
-        list_view.args = args
-        return list_view.get(request, *args, **kwargs)
+        response = render(request, 'partials/empty.html')
+        response['HX-Trigger'] = 'terminalsChanged'
+        return response

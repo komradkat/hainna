@@ -3,7 +3,11 @@
 {% block title %}Hainna - Operating Hubs{% endblock %}
 
 {% block content %}
-<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{}">
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" 
+     x-data="{}"
+     hx-get="{% url 'terminals' %}" 
+     hx-trigger="terminalsChanged from:body" 
+     hx-target="this">
 
     <!-- Header -->
     <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">

@@ -36,7 +36,7 @@ def _fetch(endpoint):
     try:
         with urllib.request.urlopen(req, timeout=5) as response:
             data = json.loads(response.read().decode())
-            cache.set(cache_key, data, timeout=2)  # Cache for 2 seconds
+            cache.set(cache_key, data, timeout=10)  # Cache for 10 seconds
             return data
     except Exception as e:
         logger.warning(f"Traccar API error on {endpoint}: {e}")

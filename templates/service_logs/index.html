@@ -3,7 +3,11 @@
 {% block title %}Hainna - Service Logs{% endblock %}
 
 {% block content %}
-<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{ filter: '' }">
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" 
+     x-data="{ filter: '' }"
+     hx-get="{% url 'service_logs' %}" 
+     hx-trigger="serviceLogsChanged from:body" 
+     hx-target="this">
 
     <!-- Header -->
     <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">

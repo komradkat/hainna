@@ -3,7 +3,11 @@
 {% block title %}Hainna - Fleet Vehicles{% endblock %}
 
 {% block content %}
-<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{ addModalOpen: false }">
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" 
+     x-data="{ addModalOpen: false }"
+     hx-get="{% url 'fleet_vehicles' %}" 
+     hx-trigger="fleetChanged from:body" 
+     hx-target="this">
     <!-- Header Section -->
     <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md">
         <div>

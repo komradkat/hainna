@@ -4,6 +4,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import datetime
+from django.utils import timezone
+from django.db.models import Sum, Q, Count
+from django.core.cache import cache
 
 class HtmxTemplateMixin(LoginRequiredMixin):
     def get_context_data(self, **kwargs):
@@ -16,7 +19,6 @@ class DashboardView(HtmxTemplateMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated and getattr(request.user, 'requires_password_change', False):
-            from django.shortcuts import redirect
             return redirect('change_password')
         return super().get(request, *args, **kwargs)
 
@@ -25,55 +27,68 @@ class DashboardView(HtmxTemplateMixin, TemplateView):
         from fleet.models import Vehicle, Driver, Route, Terminal, MaintenanceLog
         from booking.models import Trip, Ticket
         from users.models import CustomUser
-        from django.db.models import Sum
-        from django.utils import timezone
 
         terminal_id = self.request.session.get('active_terminal_id')
         terminal = Terminal.objects.filter(id=terminal_id).first()
         is_master = terminal.is_master_hub if terminal else False
         
         today = timezone.localdate()
-        
-        # Fleet and Drivers
-        total_units = Vehicle.objects.count()
-        active_units = Vehicle.objects.filter(status='Active').count()
-        total_drivers = Driver.objects.count()
-        
-        # Logistics / Trips
-        if is_master or not terminal_id:
-            active_trips = Trip.objects.filter(status__in=['Pending Vehicle', 'Standing By', 'Loading', 'Dispatched']).count()
-            total_trips_today = Trip.objects.filter(date_added__date=today).count()
-            today_revenue = Ticket.objects.filter(trip__date_added__date=today).aggregate(Sum('fare'))['fare__sum'] or 0.0
-        else:
-            active_trips = Trip.objects.filter(route__origin_id=terminal_id, status__in=['Pending Vehicle', 'Standing By', 'Loading', 'Dispatched']).count()
-            total_trips_today = Trip.objects.filter(route__origin_id=terminal_id, date_added__date=today).count()
-            today_revenue = Ticket.objects.filter(trip__route__origin_id=terminal_id, trip__date_added__date=today).aggregate(Sum('fare'))['fare__sum'] or 0.0
+        cache_key = f"dashboard_stats_{terminal_id or 'global'}_{today}"
+        stats = cache.get(cache_key)
 
-        # Personnel / Infrastructure
-        total_routes = Route.objects.count()
-        total_terminals = Terminal.objects.count()
-        pending_maintenance = MaintenanceLog.objects.exclude(status='Resolved').count()
-        active_staff = CustomUser.objects.filter(status='Active').count()
+        if not stats:
+            # Fleet and Drivers
+            total_units = Vehicle.objects.count()
+            active_units = Vehicle.objects.filter(status='Active').count()
+            total_drivers = Driver.objects.count()
+            
+            # Logistics / Trips
+            if is_master or not terminal_id:
+                active_trips = Trip.objects.filter(status__in=['Pending Vehicle', 'Standing By', 'Loading', 'Dispatched']).count()
+                total_trips_today = Trip.objects.filter(date_added__date=today).count()
+                today_revenue = Ticket.objects.filter(trip__date_added__date=today).aggregate(Sum('fare'))['fare__sum'] or 0.0
+            else:
+                active_trips = Trip.objects.filter(route__origin_id=terminal_id, status__in=['Pending Vehicle', 'Standing By', 'Loading', 'Dispatched']).count()
+                total_trips_today = Trip.objects.filter(route__origin_id=terminal_id, date_added__date=today).count()
+                today_revenue = Ticket.objects.filter(trip__route__origin_id=terminal_id, trip__date_added__date=today).aggregate(Sum('fare'))['fare__sum'] or 0.0
+
+            # Personnel / Infrastructure
+            total_routes = Route.objects.count()
+            total_terminals = Terminal.objects.count()
+            pending_maintenance = MaintenanceLog.objects.exclude(status='Resolved').count()
+            active_staff = CustomUser.objects.filter(status='Active').count()
+            
+            stats = {
+                'active_units': active_units,
+                'total_units': total_units,
+                'efficiency': f"{int((active_units / total_units) * 100)}%" if total_units else "0%",
+                'total_drivers': total_drivers,
+                'total_routes': total_routes,
+                'total_terminals': total_terminals,
+                'active_trips': active_trips,
+                'total_trips_today': total_trips_today,
+                'today_revenue': today_revenue,
+                'pending_maintenance': pending_maintenance,
+                'active_staff': active_staff
+            }
+            cache.set(cache_key, stats, 60) # Cache for 1 minute
         
-        context['stats'] = {
-            'active_units': active_units,
-            'total_units': total_units,
-            'efficiency': f"{int((active_units / total_units) * 100)}%" if total_units else "0%",
-            'total_drivers': total_drivers,
-            'total_routes': total_routes,
-            'total_terminals': total_terminals,
-            'active_trips': active_trips,
-            'total_trips_today': total_trips_today,
-            'today_revenue': today_revenue,
-            'pending_maintenance': pending_maintenance,
-            'active_staff': active_staff
-        }
+        context['stats'] = stats
         
-        # Vehicles in transit list
+        # Vehicles in transit list - Optimized with prefetch_related for trips
         vehicles = Vehicle.objects.filter(status__in=['Moving', 'Active']).select_related('driver').order_by('-last_updated')[:6]
+        
+        # Prefetch the current trip for these vehicles to avoid N+1
+        active_trips_prefetch = Trip.objects.filter(
+            vehicle__in=vehicles
+        ).exclude(status__in=['Completed', 'Cancelled']).select_related('route', 'route__destination')
+        
+        # Map trips to vehicles for quick lookup
+        vehicle_trips = {t.vehicle_id: t for t in active_trips_prefetch}
+
         transit_list = []
         for v in vehicles:
-            trip = Trip.objects.filter(vehicle=v).exclude(status__in=['Completed', 'Cancelled']).first()
+            trip = vehicle_trips.get(v.id)
             if trip:
                 eta = trip.route.est_travel_time
                 dest = trip.route.destination.name
@@ -201,11 +216,15 @@ class SchedulesView(HtmxTemplateMixin, TemplateView):
         terminal = Terminal.objects.filter(id=terminal_id).first()
 
         if terminal and terminal.is_master_hub:
-            all_trips = Trip.objects.all().order_by('-date_added').select_related('route', 'vehicle', 'vehicle__driver')
+            all_trips = Trip.objects.all().order_by('-date_added').select_related(
+                'route', 'route__origin', 'route__destination', 'vehicle', 'vehicle__driver'
+            )
             context['is_master_board'] = True
             context['terminal_name'] = "Global Network"
         elif terminal_id:
-            all_trips = Trip.objects.filter(route__origin_id=terminal_id).order_by('-date_added').select_related('route', 'vehicle', 'vehicle__driver')
+            all_trips = Trip.objects.filter(route__origin_id=terminal_id).order_by('-date_added').select_related(
+                'route', 'route__origin', 'route__destination', 'vehicle', 'vehicle__driver'
+            )
             context['is_master_board'] = False
             context['terminal_name'] = terminal.name if terminal else "Unknown"
         else:
@@ -406,14 +425,35 @@ class AddPersonnelView(HtmxTemplateMixin, TemplateView):
         form = UserForm(request.POST)
         if form.is_valid():
             form.save()
-            list_view = PersonnelView()
-            list_view.request = request
-            list_view.kwargs = kwargs
-            list_view.args = args
-            return list_view.get(request, *args, **kwargs)
+            response = render(request, 'partials/empty.html')
+            response['HX-Trigger'] = 'personnelChanged'
+            return response
         
         return render(request, self.template_name, {
             'form': form,
             'is_edit': False,
             'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
         })
+
+def health_check(request):
+    """System health check endpoint."""
+    from django.db import connections
+    from django.db.utils import OperationalError
+    from fleet import traccar
+    
+    db_conn = True
+    try:
+        connections['default'].cursor()
+    except OperationalError:
+        db_conn = False
+        
+    traccar_ok = traccar.is_connected()
+    
+    status = 200 if db_conn and traccar_ok else 500
+    
+    return JsonResponse({
+        'status': 'healthy' if status == 200 else 'degraded',
+        'database': 'online' if db_conn else 'offline',
+        'traccar': 'online' if traccar_ok else 'offline',
+        'timestamp': timezone.now().isoformat()
+    }, status=status)

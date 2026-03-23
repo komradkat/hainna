@@ -17,7 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.views import LoginView, LogoutView
-from .views import DashboardView, LiveTrackingView, SchedulesView, AddScheduleView, FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, AddPersonnelView, system_status, tracking_positions, LoginLoadingView
+from .views import (
+    DashboardView, LiveTrackingView, SchedulesView, AddScheduleView, 
+    FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, 
+    AddPersonnelView, system_status, tracking_positions, LoginLoadingView,
+    health_check
+)
 from users.views import UserManagementView, AddUserView, EditUserView, DeleteUserView, ChangePasswordView
 from fleet.views import FleetVehiclesView, AddVehicleView, EditVehicleView, DeleteVehicleView, DriversView, AddDriverView, EditDriverView, DeleteDriverView, ServiceLogsView, AddServiceLogView, EditServiceLogView, DeleteServiceLogView, RoutesView, AddRouteView, EditRouteView, DeleteRouteView, AddZoneView, EditZoneView, DeleteZoneView, TerminalsView, AddTerminalView, EditTerminalView, DeleteTerminalView
 
@@ -65,5 +70,6 @@ urlpatterns = [
     path('users/delete/<int:pk>/', DeleteUserView.as_view(), name='delete_user'),
     path('users/change-password/', ChangePasswordView.as_view(), name='change_password'),
     path('system-status/', system_status, name='system_status'),
+    path('health/', health_check, name='health_check'),
     path('booking/', include('booking.urls')),
 ]
