@@ -47,8 +47,8 @@ uv run python manage.py migrate
 # 5. Create superuser
 uv run python manage.py bootstrap_admin
 
-# 6. (Optional) Seed routes for Leyte
-uv run python manage.py seed_leyte
+# 6. (Optional) Seed initial data
+uv run python manage.py seed
 
 # 7. Start server
 uv run python manage.py runserver
@@ -104,7 +104,7 @@ hainna/
 |---|---|
 | `uv run python manage.py migrate` | Apply database migrations |
 | `uv run python manage.py bootstrap_admin` | Create the default admin account |
-| `uv run python manage.py seed_leyte` | Seed terminals and routes for Eastern Visayas |
+| `uv run python manage.py seed` | Seed terminals, routes, and initial test data |
 | `uv run python manage.py collectstatic` | Collect static files for production |
 | `uv run python manage.py check --deploy` | Run Django's production readiness checklist |
 | `uv run python manage.py createsuperuser` | Create a custom superuser |

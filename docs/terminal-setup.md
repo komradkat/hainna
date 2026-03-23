@@ -14,17 +14,28 @@ Users select their active terminal once per session via the **Active Station** p
 
 ---
 
+## Master Hubs
+
+A terminal can be designated as a **Master Hub** by setting `is_master_hub=True` in the database. 
+
+Personnel stationed at a Master Hub have elevated privileges:
+- **Global Visibility**: View all active trips, schedules, and metrics across the entire network.
+- **Global Dispatch**: Ability to manage trips and dispatch vehicles for any route, even those not originating from the current terminal.
+- **Network Dashboard**: The dashboard shows aggregate stats for the whole fleet instead of a single station.
+
+---
+
 ## Setting Up Terminals
 
-Terminals are seeded via the management command for the Leyte network:
+Terminals are seeded via the management command:
 
 ```bash
-uv run python manage.py seed_leyte
+uv run python manage.py seed
 ```
 
-This creates all terminals and routes for Eastern Visayas.
+This bootstraps the core terminal network and routes.
 
-To add terminals manually, go to Django Admin at `/admin/` → **Fleet → Terminals → Add Terminal**.
+To add terminals manually, go to **Fleet → Terminals** in the side navigation. This internal management UI allows you to create and edit terminals without needing access to the Django Admin.
 
 ---
 

@@ -16,7 +16,7 @@
 | 🎫 **Booking & Dispatch** | POS-style ticket issuance, trip queue management, FIFO dispatch |
 | 📺 **Public TV Board** | Large-font departure/arrival board for terminal displays |
 | 🗺️ **Live Tracking** | Real-time GPS map via Traccar integration (5s polling) |
-| 🏢 **Terminal Awareness** | Each cashier session is scoped to a physical terminal |
+| 🏢 **Terminal Awareness** | Sessions are scoped to terminals. **Master Hubs** grant global network visibility. |
 | 👥 **User Management** | Role-based access, password policy enforcement |
 | 📊 **Analytics** | Trip statistics and fleet utilisation (in progress) |
 
@@ -50,8 +50,8 @@ uv run python manage.py migrate
 # 5. Create an admin user
 uv run python manage.py bootstrap_admin
 
-# 6. (Optional) Seed Philippine routes
-uv run python manage.py seed_leyte
+# 6. (Optional) Seed initial data
+uv run python manage.py seed
 
 # 7. Start development server
 uv run python manage.py runserver

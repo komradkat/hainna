@@ -22,7 +22,7 @@ apps/
 
 | Model | Description |
 |---|---|
-| `Terminal` | Physical node (bus terminal) with lat/lng coordinates |
+| `Terminal` | Physical node (bus terminal). `is_master_hub` grants global dispatch/viewing rights. |
 | `Route` | Directional link between two Terminals with distance/time |
 | `Vehicle` | Van/bus with Traccar Device ID for GPS tracking |
 | `Driver` | Driver record linked to a User |
@@ -79,11 +79,20 @@ Browser ──▶ Nginx ──▶ Gunicorn ──▶ Django
                       Postgres    (static)    HTMX partials
 ```
 
-### HTMX Navigation
+### HTMX Navigation & Dynamic UI
 
-Pages use **HTMX** for partial updates — navigation swaps only the `<main>` content area, avoiding full page reloads. Views detect `HX-Request` headers and return either:
-- `base.html` (full page for direct access)
-- `partial_base.html` (content only for HTMX swap)
+The interface uses **HTMX** for partial page updates to maintain a smooth, "app-like" feel without full reloads:
+- **Sidebar Integration**: The sidebar remains static while the contents of the `<main>` area are swapped on navigation.
+- **Partial Swaps**: Views detect `HX-Request` and return either `base.html` (full page) or `partial_base.html` (main content only).
+- **Event Triggers**: The system uses `HX-Trigger` headers to refresh UI components across different areas of the dashboard (e.g., `fleetChanged` triggers a refresh of the metrics overview).
+
+---
+
+## Performance & Caching
+
+To ensure low latency on high-traffic terminals:
+- **Dashboard Stats**: Key metrics (revenue, active trips, fleet efficiency) are cached using Django's cache framework with a 60-second TTL.
+- **Select Related**: Views heavily use `.select_related()` and `.prefetch_related()` to avoid N+1 query bottlenecks in the dispatch boards.
 
 ---
 
