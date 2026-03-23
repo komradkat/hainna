@@ -1,0 +1,147 @@
+{% extends base_template|default:'base.html' %}
+
+{% block title %}Hainna - {% if is_edit %}Edit{% else %}Add{% endif %} Terminal{% endblock %}
+
+{% block content %}
+<div class="h-full overflow-y-auto bg-[#0A0B10] custom-scrollbar p-10">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col items-start gap-4 mb-10">
+            <button hx-get="{% url 'terminals' %}" hx-target="main" hx-push-url="true" class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white flex items-center gap-2 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Back to Terminals
+            </button>
+            <div>
+                <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-2">{% if is_edit %}Update Info{% else %}New Entry{% endif %}</h3>
+                <h2 class="text-4xl font-black text-white tracking-tight">{% if is_edit %}Edit Terminal Node{% else %}Instantiate Terminal Node{% endif %}</h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 min-h-[600px]">
+            <!-- Left: Form -->
+            <div class="bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+                <div class="h-2 w-full bg-gradient-to-r from-emerald-600 to-teal-500 shrink-0"></div>
+                
+                <form class="p-8 space-y-8 flex-1 flex flex-col" {% if is_edit %}hx-post="{% url 'edit_terminal' terminal.pk %}"{% else %}hx-post="{% url 'add_terminal' %}"{% endif %} hx-target="main" hx-push-url="{% url 'terminals' %}">
+                    {% csrf_token %}
+                    
+                    <div class="flex-1">
+                        <h4 class="text-xs font-black uppercase tracking-[0.2em] text-white border-b border-white/10 pb-4 mb-6">Location Information</h4>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Terminal Designation</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Latitude</label>
+                                    {{ form.location_lat }}
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Longitude</label>
+                                    {{ form.location_lng }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/10 flex justify-end gap-4 shrink-0">
+                        <button type="button" hx-get="{% url 'terminals' %}" hx-target="main" hx-push-url="true" class="px-8 py-4 rounded-xl border border-white/10 text-[11px] font-black uppercase tracking-widest text-white/40 hover:bg-white/5 hover:text-white transition-all">Cancel</button>
+                        <button type="submit" class="px-12 py-4 rounded-xl bg-emerald-600 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:bg-emerald-500 transition-all">{% if is_edit %}Save Changes{% else %}Commit Terminal{% endif %}</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: Interactive Map -->
+            <div class="bg-black/40 border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative min-h-[500px]">
+                <div id="terminal-map" class="absolute inset-0 z-0"></div>
+                <div class="absolute top-6 left-6 right-6 z-[1000] pointer-events-none">
+                    <div class="bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-center shadow-2xl">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-1">Interactive Location Picker</p>
+                        <p class="text-xs font-bold text-white/70">Click anywhere on the map to set the terminal's coordinates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+
+<script>
+(function() {
+    function initTerminalMap() {
+        const el = document.getElementById('terminal-map');
+        if (!el) return;
+        if (el._leaflet_id && window.terminalMap) { window.terminalMap.invalidateSize(); return; }
+        if (el.offsetWidth === 0 || el.offsetHeight === 0) { requestAnimationFrame(initTerminalMap); return; }
+
+        const latInput = document.querySelector('input[name="location_lat"]');
+        const lngInput = document.querySelector('input[name="location_lng"]');
+        
+        // Default to Manila
+        let initialLat = 14.5995;
+        let initialLng = 120.9842;
+        let hasExisting = false;
+        
+        if (latInput && lngInput && latInput.value && lngInput.value) {
+            initialLat = parseFloat(latInput.value);
+            initialLng = parseFloat(lngInput.value);
+            hasExisting = true;
+        }
+
+        const map = L.map(el, { zoomControl: true, attributionControl: false }).setView([initialLat, initialLng], hasExisting ? 16 : 12);
+        window.terminalMap = map;
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 18 }).addTo(map);
+
+        let marker = null;
+        
+        function createMarker(latlng) {
+            if (marker) {
+                marker.setLatLng(latlng);
+            } else {
+                marker = L.marker(latlng, { draggable: true }).addTo(map);
+                marker.on('dragend', function(e) {
+                    const pos = e.target.getLatLng();
+                    if (latInput) latInput.value = pos.lat.toFixed(6);
+                    if (lngInput) lngInput.value = pos.lng.toFixed(6);
+                });
+            }
+        }
+        
+        if (hasExisting) {
+            createMarker([initialLat, initialLng]);
+        }
+
+        map.on('click', function(e) {
+            createMarker(e.latlng);
+            if (latInput) latInput.value = e.latlng.lat.toFixed(6);
+            if (lngInput) lngInput.value = e.latlng.lng.toFixed(6);
+        });
+
+        // Add explicit keyboard/change listeners on manual input to update the marker automatically
+        function syncMapFromInputs() {
+            if (latInput.value && lngInput.value) {
+                const lat = parseFloat(latInput.value);
+                const lng = parseFloat(lngInput.value);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    createMarker([lat, lng]);
+                    map.panTo([lat, lng]);
+                }
+            }
+        }
+        if (latInput) latInput.addEventListener('change', syncMapFromInputs);
+        if (lngInput) lngInput.addEventListener('change', syncMapFromInputs);
+
+        new ResizeObserver(() => { if (window.terminalMap) window.terminalMap.invalidateSize(); }).observe(el);
+    }
+    setTimeout(initTerminalMap, 250);
+})();
+</script>
+{% endblock %}

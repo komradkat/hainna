@@ -1,5 +1,5 @@
 from django import forms
-from .models import Vehicle, Driver, MaintenanceLog, Route, Zone
+from .models import Vehicle, Driver, MaintenanceLog, Route, Zone, Terminal
 
 class VehicleForm(forms.ModelForm):
     class Meta:
@@ -48,4 +48,14 @@ class ZoneForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all', 'placeholder': 'e.g. North Hub Zone'}),
             'zone_type': forms.Select(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:outline-none focus:border-blue-500/50 transition-all appearance-none cursor-pointer'}),
             'coordinates': forms.Textarea(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-blue-500/50 transition-all custom-scrollbar', 'placeholder': 'e.g. [[14.5995, 120.9842], [14.6095, 120.9942], ...]', 'rows': 4}),
+        }
+
+class TerminalForm(forms.ModelForm):
+    class Meta:
+        model = Terminal
+        fields = ['name', 'location_lat', 'location_lng']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-emerald-500/50 transition-all', 'placeholder': 'e.g. Manila Main Hub'}),
+            'location_lat': forms.NumberInput(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-emerald-500/50 transition-all', 'placeholder': 'e.g. 14.5995', 'step': '0.000001'}),
+            'location_lng': forms.NumberInput(attrs={'class': 'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white placeholder:text-white/10 focus:outline-none focus:border-emerald-500/50 transition-all', 'placeholder': 'e.g. 120.9842', 'step': '0.000001'}),
         }

@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from core.views import HtmxTemplateMixin
-from .models import Vehicle, Driver, MaintenanceLog, Route, Zone
-from .forms import VehicleForm, DriverForm, ServiceLogForm, RouteForm, ZoneForm
+from .models import Vehicle, Driver, MaintenanceLog, Route, Zone, Terminal
+from .forms import VehicleForm, DriverForm, ServiceLogForm, RouteForm, ZoneForm, TerminalForm
 
 class FleetVehiclesView(HtmxTemplateMixin, TemplateView):
     template_name = 'fleet/index.html'
@@ -387,6 +387,81 @@ class DeleteZoneView(LoginRequiredMixin, View):
         zone = get_object_or_404(Zone, pk=self.kwargs.get('pk'))
         zone.delete()
         list_view = RoutesView()
+        list_view.request = request
+        list_view.kwargs = kwargs
+        list_view.args = args
+        return list_view.get(request, *args, **kwargs)
+
+class TerminalsView(HtmxTemplateMixin, TemplateView):
+    template_name = 'terminals/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['terminals'] = Terminal.objects.all().order_by('-date_added')
+        context['stats'] = {
+            'total': Terminal.objects.count()
+        }
+        return context
+
+class AddTerminalView(HtmxTemplateMixin, TemplateView):
+    template_name = 'terminals/form.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = TerminalForm()
+        context['is_edit'] = False
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form = TerminalForm(request.POST)
+        if form.is_valid():
+            form.save()
+            list_view = TerminalsView()
+            list_view.request = request
+            list_view.kwargs = kwargs
+            list_view.args = args
+            return list_view.get(request, *args, **kwargs)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'is_edit': False,
+            'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+        })
+
+class EditTerminalView(HtmxTemplateMixin, TemplateView):
+    template_name = 'terminals/form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        terminal = get_object_or_404(Terminal, pk=self.kwargs.get('pk'))
+        context['form'] = TerminalForm(instance=terminal)
+        context['is_edit'] = True
+        context['terminal'] = terminal
+        return context
+
+    def post(self, request, *args, **kwargs):
+        terminal = get_object_or_404(Terminal, pk=self.kwargs.get('pk'))
+        form = TerminalForm(request.POST, instance=terminal)
+        if form.is_valid():
+            form.save()
+            list_view = TerminalsView()
+            list_view.request = request
+            list_view.kwargs = kwargs
+            list_view.args = args
+            return list_view.get(request, *args, **kwargs)
+        
+        return render(request, self.template_name, {
+            'form': form,
+            'is_edit': True,
+            'terminal': terminal,
+            'base_template': 'partial_base.html' if request.headers.get('HX-Request') else 'base.html'
+        })
+
+class DeleteTerminalView(LoginRequiredMixin, View):
+    def delete(self, request, *args, **kwargs):
+        terminal = get_object_or_404(Terminal, pk=self.kwargs.get('pk'))
+        terminal.delete()
+        list_view = TerminalsView()
         list_view.request = request
         list_view.kwargs = kwargs
         list_view.args = args

@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.contrib.auth.views import LoginView, LogoutView
 from .views import DashboardView, LiveTrackingView, SchedulesView, AddScheduleView, FuelMonitoringView, AddFuelView, AnalyticsView, PersonnelView, AddPersonnelView, system_status, tracking_positions, LoginLoadingView
 from users.views import UserManagementView, AddUserView, EditUserView, DeleteUserView, ChangePasswordView
-from fleet.views import FleetVehiclesView, AddVehicleView, EditVehicleView, DeleteVehicleView, DriversView, AddDriverView, EditDriverView, DeleteDriverView, ServiceLogsView, AddServiceLogView, EditServiceLogView, DeleteServiceLogView, RoutesView, AddRouteView, EditRouteView, DeleteRouteView, AddZoneView, EditZoneView, DeleteZoneView
+from fleet.views import FleetVehiclesView, AddVehicleView, EditVehicleView, DeleteVehicleView, DriversView, AddDriverView, EditDriverView, DeleteDriverView, ServiceLogsView, AddServiceLogView, EditServiceLogView, DeleteServiceLogView, RoutesView, AddRouteView, EditRouteView, DeleteRouteView, AddZoneView, EditZoneView, DeleteZoneView, TerminalsView, AddTerminalView, EditTerminalView, DeleteTerminalView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -37,6 +37,10 @@ urlpatterns = [
     path('fleet/drivers/add/', AddDriverView.as_view(), name='add_driver'),
     path('fleet/drivers/edit/<int:pk>/', EditDriverView.as_view(), name='edit_driver'),
     path('fleet/drivers/delete/<int:pk>/', DeleteDriverView.as_view(), name='delete_driver'),
+    path('fleet/terminals/', TerminalsView.as_view(), name='terminals'),
+    path('fleet/terminals/add/', AddTerminalView.as_view(), name='add_terminal'),
+    path('fleet/terminals/edit/<int:pk>/', EditTerminalView.as_view(), name='edit_terminal'),
+    path('fleet/terminals/delete/<int:pk>/', DeleteTerminalView.as_view(), name='delete_terminal'),
     path('fleet/routes/', RoutesView.as_view(), name='routes'),
     path('fleet/routes/add/', AddRouteView.as_view(), name='add_route'),
     path('fleet/routes/edit/<int:pk>/', EditRouteView.as_view(), name='edit_route'),

@@ -1,0 +1,102 @@
+{% extends base_template %}
+
+{% block title %}Hainna - Operating Hubs{% endblock %}
+
+{% block content %}
+<div class="h-full overflow-hidden flex flex-col bg-[#0A0B10]" x-data="{}">
+
+    <!-- Header -->
+    <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">
+        <div>
+            <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">Logistics</h3>
+            <h2 class="text-3xl font-black text-white tracking-tight">Operating Hubs</h2>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Add Terminal Button -->
+            <button hx-get="{% url 'add_terminal' %}" hx-target="main" hx-push-url="true"
+                    class="btn btn-circle bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-emerald-500/50 hover:text-emerald-400 transition-all">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="px-8 py-4 border-b border-white/5 bg-black/10 flex items-center gap-6 shrink-0">
+        <div class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_#10b981] animate-pulse"></div>
+            <span class="text-[10px] font-black uppercase tracking-widest text-white/40">Active Nodes</span>
+        </div>
+        <div class="ml-auto text-[10px] font-black uppercase tracking-widest text-white/20">{{ stats.total }} Total Hubs</div>
+    </div>
+
+    <!-- Terminal Grid -->
+    <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for terminal in terminals %}
+            <div class="group relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-emerald-500/50 transition-all duration-500 flex flex-col cursor-pointer">
+
+                <!-- Card Header with Icon -->
+                <div class="p-6 pb-4 flex items-start gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-600/30 to-emerald-900/30 border border-emerald-500/20 flex items-center justify-center text-xl font-black text-emerald-400 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">TRM-{{ terminal.id|stringformat:"03d" }}</span>
+                        </div>
+                        <h3 class="text-[16px] font-black text-white tracking-tight leading-tight group-hover:text-emerald-400 transition-colors truncate">{{ terminal.name }}</h3>
+                        <p class="text-[9px] font-bold text-emerald-500/70 uppercase tracking-widest mt-1">Operating Hub</p>
+                    </div>
+                </div>
+
+                <!-- Info Grid -->
+                <div class="px-6 pb-6 space-y-2.5 flex-1">
+                    <!-- Location Lat / Lng -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+                            <p class="text-[8px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">Latitude</p>
+                            <p class="text-xs font-black text-white">{{ terminal.location_lat|default:"N/A" }}</p>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+                            <p class="text-[8px] font-black text-white/20 uppercase tracking-widest leading-none mb-1">Longitude</p>
+                            <p class="text-xs font-black text-white">{{ terminal.location_lng|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-[10px] font-bold text-white/40">
+                        <span>Connected Routes:</span>
+                        <span class="text-white font-black">{{ terminal.outbound_routes.count|add:terminal.inbound_routes.count }}</span>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-6 pt-4 pb-5 border-t border-white/5 flex items-center justify-between">
+                    <div class="text-[9px] font-bold text-white/20 uppercase tracking-widest">{{ terminal.date_added|date:"M j, Y" }}</div>
+                    <div class="flex items-center gap-3">
+                        <button hx-get="{% url 'edit_terminal' terminal.pk %}" hx-target="main" hx-push-url="true" class="text-[10px] font-black uppercase tracking-widest text-emerald-400/70 hover:text-emerald-400 transition-colors">
+                            Edit
+                        </button>
+                        <button hx-delete="{% url 'delete_terminal' terminal.pk %}" hx-confirm="Are you sure you want to completely remove this operating hub?" hx-target="main" class="text-[10px] font-black uppercase tracking-widest text-rose-500/70 hover:text-rose-500 transition-colors">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-20 flex flex-col items-center justify-center border border-white/5 bg-white/[0.02] rounded-3xl">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-30 mb-4 text-emerald-500"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path></svg>
+                <p class="text-[10px] font-black uppercase tracking-widest text-white/30">No Terminals Instantiated</p>
+                <button hx-get="{% url 'add_terminal' %}" hx-target="main" hx-push-url="true" class="mt-6 btn btn-sm bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 hover:bg-emerald-500/40">Instantiate Hub Node</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+{% endblock %}
