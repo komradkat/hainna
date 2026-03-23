@@ -22,8 +22,69 @@ class DashboardView(HtmxTemplateMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['stats'] = {'active_units': 0, 'idle_units': 0, 'total_units': 0, 'efficiency': '0%', 'on_time_rate': '0%'}
-        context['vehicles'] = []
+        from fleet.models import Vehicle, Driver, Route, Terminal, MaintenanceLog
+        from booking.models import Trip, Ticket
+        from users.models import CustomUser
+        from django.db.models import Sum
+        from django.utils import timezone
+
+        today = timezone.localdate()
+        
+        # Fleet and Drivers
+        total_units = Vehicle.objects.count()
+        active_units = Vehicle.objects.filter(status='Active').count()
+        total_drivers = Driver.objects.count()
+        
+        # Logistics
+        total_routes = Route.objects.count()
+        total_terminals = Terminal.objects.count()
+        
+        # Dispatch
+        today_trips = Trip.objects.filter(date_added__date=today)
+        active_trips = today_trips.exclude(status__in=['Completed', 'Cancelled']).count()
+        total_trips_today = today_trips.count()
+        
+        # Revenue
+        today_tickets = Ticket.objects.filter(date_added__date=today)
+        today_revenue = today_tickets.aggregate(total=Sum('fare'))['total'] or 0.00
+        
+        # Infrastructure
+        pending_maintenance = MaintenanceLog.objects.exclude(status='Resolved').count()
+        
+        # Personnel
+        active_staff = CustomUser.objects.filter(status='Active').count()
+        
+        context['stats'] = {
+            'active_units': active_units,
+            'total_units': total_units,
+            'efficiency': f"{int((active_units / total_units) * 100)}%" if total_units else "0%",
+            'total_drivers': total_drivers,
+            'total_routes': total_routes,
+            'total_terminals': total_terminals,
+            'active_trips': active_trips,
+            'total_trips_today': total_trips_today,
+            'today_revenue': today_revenue,
+            'pending_maintenance': pending_maintenance,
+            'active_staff': active_staff
+        }
+        
+        # Vehicles in transit list
+        vehicles = Vehicle.objects.filter(status='Active').select_related('driver').order_by('-last_updated')[:10]
+        transit_list = []
+        for v in vehicles:
+            transit_list.append({
+                'id': v.plate_number,
+                'driver': str(v.driver) if v.driver else 'Unassigned',
+                'status': 'Moving' if v.status == 'Active' else v.status,
+                'eta': 'Unknown',
+                'destination': 'Tracking...'
+            })
+        context['vehicles'] = transit_list
+        
+        # Spatial Map Layers Context
+        context['map_terminals'] = list(Terminal.objects.values('name', 'location_lat', 'location_lng'))
+        context['map_routes'] = list(Route.objects.exclude(path_coordinates='').values('name', 'path_coordinates', 'color'))
+        
         return context
 
 class LoginLoadingView(LoginRequiredMixin, TemplateView):
