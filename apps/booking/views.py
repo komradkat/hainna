@@ -30,7 +30,8 @@ class BookingPOSView(HtmxTemplateMixin, TemplateView):
     template_name = 'booking/pos.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.session.get('active_terminal_id'):
+        terminal_id = request.session.get('active_terminal_id')
+        if not terminal_id or not Terminal.objects.filter(id=terminal_id).exists():
             from django.urls import reverse
             return redirect(f"{reverse('booking:select_terminal')}?next={request.path}")
         return super().dispatch(request, *args, **kwargs)
@@ -137,7 +138,8 @@ class DispatchBoardView(HtmxTemplateMixin, TemplateView):
     template_name = 'booking/dispatch.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.session.get('active_terminal_id'):
+        terminal_id = request.session.get('active_terminal_id')
+        if not terminal_id or not Terminal.objects.filter(id=terminal_id).exists():
             from django.urls import reverse
             return redirect(f"{reverse('booking:select_terminal')}?next={request.path}")
         return super().dispatch(request, *args, **kwargs)

@@ -69,15 +69,25 @@ class DashboardView(HtmxTemplateMixin, TemplateView):
         }
         
         # Vehicles in transit list
-        vehicles = Vehicle.objects.filter(status='Active').select_related('driver').order_by('-last_updated')[:10]
+        vehicles = Vehicle.objects.filter(status__in=['Moving', 'Active']).select_related('driver').order_by('-last_updated')[:6]
         transit_list = []
         for v in vehicles:
+            trip = Trip.objects.filter(vehicle=v).exclude(status__in=['Completed', 'Cancelled']).first()
+            if trip:
+                eta = trip.route.est_travel_time
+                dest = trip.route.destination.name
+                status = trip.status
+            else:
+                eta = 'N/A'
+                dest = 'Idle in Hub'
+                status = 'Standby'
+                
             transit_list.append({
                 'id': v.plate_number,
                 'driver': str(v.driver) if v.driver else 'Unassigned',
-                'status': 'Moving' if v.status == 'Active' else v.status,
-                'eta': 'Unknown',
-                'destination': 'Tracking...'
+                'status': status,
+                'eta': eta,
+                'destination': dest
             })
         context['vehicles'] = transit_list
         
@@ -176,18 +186,76 @@ class SchedulesView(HtmxTemplateMixin, TemplateView):
     template_name = 'schedules/index.html'
 
     def get_context_data(self, **kwargs):
+        from booking.models import Trip
         context = super().get_context_data(**kwargs)
         import datetime as dt
-        today = dt.date.today()
+        from django.utils import timezone
+        
+        today = timezone.localtime().date()
         monday = today - dt.timedelta(days=today.weekday())
+        week_end = monday + dt.timedelta(days=7)
+        
+        all_trips = Trip.objects.select_related('route', 'vehicle', 'vehicle__driver').order_by('-date_added')
+        
+        ongoing = all_trips.filter(status__in=['Pending Vehicle', 'Standing By', 'Loading', 'Dispatched']).count()
+        completed = all_trips.filter(status='Completed').count()
+        upcoming = all_trips.filter(status='Pending Vehicle').count()
+        
+        context['stats'] = {'total': all_trips.count(), 'ongoing': ongoing, 'upcoming': upcoming, 'completed': completed}
+        
         days = []
         day_labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        daily_trips_map = {i: [] for i in range(7)}
+        raw_schedules = []
+        
+        for t in all_trips:
+            if t.status in ['Completed']:
+                t_state = 'Completed'
+            elif t.status in ['Cancelled']:
+                t_state = 'Cancelled'
+            elif t.status in ['Dispatched', 'Loading', 'Standing By']:
+                t_state = 'Ongoing'
+            else:
+                t_state = 'Upcoming'
+                
+            dep_time = t.date_added.strftime("%I:%M %p")
+            if t.scheduled_time:
+                dep_time = t.scheduled_time.strftime("%I:%M %p")
+                
+            unit_display = t.vehicle.plate_number if t.vehicle else "Unassigned"
+            driver_display = str(t.vehicle.driver) if t.vehicle and t.vehicle.driver else "Awaiting Dispatch"
+            
+            trip_dict = {
+                'id': f"TRP-{t.id:04d}",
+                'unit': unit_display,
+                'driver': driver_display,
+                'route': t.route.name,
+                'origin': t.route.origin.name,
+                'destination': t.route.destination.name,
+                'time': dep_time,
+                'departure': dep_time,
+                'date': t.date_added.strftime("%b %d, %Y"),
+                'eta': t.route.est_travel_time,
+                'status': t_state,
+            }
+            raw_schedules.append(trip_dict)
+            
+            t_date = timezone.localtime(t.date_added).date()
+            if monday <= t_date < week_end:
+                day_index = (t_date - monday).days
+                daily_trips_map[day_index].append(trip_dict)
+                
         for i, label in enumerate(day_labels):
             d = monday + dt.timedelta(days=i)
-            days.append({'label': label, 'date': str(d.day), 'today': d == today, 'trips': []})
+            days.append({
+                'label': label, 
+                'date': str(d.day), 
+                'today': d == today, 
+                'trips': daily_trips_map[i][:6]
+            })
+            
         context['week_days'] = days
-        context['stats'] = {'total': 0, 'ongoing': 0, 'upcoming': 0, 'completed': 0}
-        context['schedules'] = []
+        context['schedules'] = raw_schedules
         return context
 
 class AddScheduleView(HtmxTemplateMixin, TemplateView):
