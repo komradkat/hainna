@@ -144,7 +144,12 @@ class Command(BaseCommand):
         ]
         term_map = {}
         for name, lat, lng in terminals_data:
-            term_map[name] = Terminal.objects.create(name=name, location_lat=lat, location_lng=lng)
+            term_map[name] = Terminal.objects.create(
+                name=name, 
+                location_lat=lat, 
+                location_lng=lng,
+                is_master_hub=(name == "Tacloban City Hub")
+            )
         self.stdout.write(self.style.SUCCESS("Bootstrapped Terminal Nodes."))
 
         # 7. Seed Routes
@@ -155,6 +160,18 @@ class Command(BaseCommand):
             {"name": "Tacloban - Carigara Loop", "origin": "Tacloban City Hub", "destination": "Carigara Terminal", "color": "#8b5cf6", "coords": [(11.2430, 125.0081), (11.3000, 124.6833)]},
             {"name": "Ormoc - Maasin Line", "origin": "Ormoc City Terminal", "destination": "Maasin City Hub", "color": "#ef4444", "coords": [(11.0050, 124.6075), (10.1333, 124.8333)]}
         ]
+        
+        inverse_routes = []
+        for r in routes:
+            inverse_routes.append({
+                "name": f"Return: {r['destination'].split(' ')[0]} to {r['origin'].split(' ')[0]}",
+                "origin": r['destination'],
+                "destination": r['origin'],
+                "color": r['color'],
+                "coords": list(reversed(r['coords']))
+            })
+        routes.extend(inverse_routes)
+
         route_objs = []
         self.stdout.write("Seeding Leyte routes via OSRM...")
         for r in routes:

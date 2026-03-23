@@ -9,7 +9,9 @@
     <div class="p-8 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md shrink-0">
         <div>
             <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">Logistics</h3>
-            <h2 class="text-3xl font-black text-white tracking-tight">Schedules</h2>
+            <h1 class="text-3xl font-black text-white/90 drop-shadow-md tracking-tight">
+                {% if is_master_board %}Global Dispatch Routing{% else %}Terminal Dispatch Board{% endif %}
+            </h1>
         </div>
 
         <div class="flex items-center gap-4">

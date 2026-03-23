@@ -89,12 +89,13 @@ class Terminal(models.Model):
     name = models.CharField(max_length=100, unique=True)
     location_lat = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     location_lng = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    is_master_hub = models.BooleanField(default=False, help_text="Grants global dispatch and viewing rights to personnel stationed here.")
     
     date_added = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} (Master)" if self.is_master_hub else self.name
 
 class Route(models.Model):
     STATUS_CHOICES = [

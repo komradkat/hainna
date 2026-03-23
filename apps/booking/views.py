@@ -39,8 +39,17 @@ class BookingPOSView(HtmxTemplateMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         terminal_id = self.request.session.get('active_terminal_id')
-        context['routes'] = Route.objects.filter(origin_id=terminal_id, status='Active')
-        context['active_trips'] = Trip.objects.filter(route__origin_id=terminal_id).exclude(status__in=['Completed', 'Cancelled']).order_by('date_added')
+        terminal = Terminal.objects.filter(id=terminal_id).first()
+        
+        if terminal and terminal.is_master_hub:
+            context['routes'] = Route.objects.filter(status='Active')
+            context['active_trips'] = Trip.objects.exclude(status__in=['Completed', 'Cancelled']).order_by('date_added')
+            context['is_master'] = True
+        else:
+            context['routes'] = Route.objects.filter(origin_id=terminal_id, status='Active')
+            context['active_trips'] = Trip.objects.filter(route__origin_id=terminal_id).exclude(status__in=['Completed', 'Cancelled']).order_by('date_added')
+            context['is_master'] = False
+            
         return context
 
 @login_required
@@ -147,11 +156,17 @@ class DispatchBoardView(HtmxTemplateMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         terminal_id = self.request.session.get('active_terminal_id')
+        terminal = Terminal.objects.filter(id=terminal_id).first()
         
-        # Outbound local dispatch elements
-        context['active_trips'] = Trip.objects.filter(route__origin_id=terminal_id).exclude(status__in=['Completed', 'Cancelled', 'Dispatched']).order_by('date_added')
-        # Inbound targets
-        context['inbound_trips'] = Trip.objects.filter(route__destination_id=terminal_id, status='Dispatched').order_by('last_updated')
+        if terminal and terminal.is_master_hub:
+            context['active_trips'] = Trip.objects.exclude(status__in=['Completed', 'Cancelled', 'Dispatched']).order_by('date_added')
+            context['inbound_trips'] = Trip.objects.filter(status='Dispatched').order_by('last_updated')
+            context['is_master_board'] = True
+        else:
+            context['active_trips'] = Trip.objects.filter(route__origin_id=terminal_id).exclude(status__in=['Completed', 'Cancelled', 'Dispatched']).order_by('date_added')
+            context['inbound_trips'] = Trip.objects.filter(route__destination_id=terminal_id, status='Dispatched').order_by('last_updated')
+            context['is_master_board'] = False
+            
         return context
 
 @login_required

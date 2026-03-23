@@ -28,6 +28,10 @@ class DashboardView(HtmxTemplateMixin, TemplateView):
         from django.db.models import Sum
         from django.utils import timezone
 
+        terminal_id = self.request.session.get('active_terminal_id')
+        terminal = Terminal.objects.filter(id=terminal_id).first()
+        is_master = terminal.is_master_hub if terminal else False
+        
         today = timezone.localdate()
         
         # Fleet and Drivers
@@ -35,23 +39,20 @@ class DashboardView(HtmxTemplateMixin, TemplateView):
         active_units = Vehicle.objects.filter(status='Active').count()
         total_drivers = Driver.objects.count()
         
-        # Logistics
+        # Logistics / Trips
+        if is_master or not terminal_id:
+            active_trips = Trip.objects.filter(status__in=['Pending Vehicle', 'Standing By', 'Loading', 'Dispatched']).count()
+            total_trips_today = Trip.objects.filter(date_added__date=today).count()
+            today_revenue = Ticket.objects.filter(trip__date_added__date=today).aggregate(Sum('fare'))['fare__sum'] or 0.0
+        else:
+            active_trips = Trip.objects.filter(route__origin_id=terminal_id, status__in=['Pending Vehicle', 'Standing By', 'Loading', 'Dispatched']).count()
+            total_trips_today = Trip.objects.filter(route__origin_id=terminal_id, date_added__date=today).count()
+            today_revenue = Ticket.objects.filter(trip__route__origin_id=terminal_id, trip__date_added__date=today).aggregate(Sum('fare'))['fare__sum'] or 0.0
+
+        # Personnel / Infrastructure
         total_routes = Route.objects.count()
         total_terminals = Terminal.objects.count()
-        
-        # Dispatch
-        today_trips = Trip.objects.filter(date_added__date=today)
-        active_trips = today_trips.exclude(status__in=['Completed', 'Cancelled']).count()
-        total_trips_today = today_trips.count()
-        
-        # Revenue
-        today_tickets = Ticket.objects.filter(date_added__date=today)
-        today_revenue = today_tickets.aggregate(total=Sum('fare'))['total'] or 0.00
-        
-        # Infrastructure
         pending_maintenance = MaintenanceLog.objects.exclude(status='Resolved').count()
-        
-        # Personnel
         active_staff = CustomUser.objects.filter(status='Active').count()
         
         context['stats'] = {
@@ -187,6 +188,7 @@ class SchedulesView(HtmxTemplateMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         from booking.models import Trip
+        from fleet.models import Terminal
         context = super().get_context_data(**kwargs)
         import datetime as dt
         from django.utils import timezone
@@ -194,8 +196,22 @@ class SchedulesView(HtmxTemplateMixin, TemplateView):
         today = timezone.localtime().date()
         monday = today - dt.timedelta(days=today.weekday())
         week_end = monday + dt.timedelta(days=7)
-        
-        all_trips = Trip.objects.select_related('route', 'vehicle', 'vehicle__driver').order_by('-date_added')
+
+        terminal_id = self.request.session.get('active_terminal_id')
+        terminal = Terminal.objects.filter(id=terminal_id).first()
+
+        if terminal and terminal.is_master_hub:
+            all_trips = Trip.objects.all().order_by('-date_added').select_related('route', 'vehicle', 'vehicle__driver')
+            context['is_master_board'] = True
+            context['terminal_name'] = "Global Network"
+        elif terminal_id:
+            all_trips = Trip.objects.filter(route__origin_id=terminal_id).order_by('-date_added').select_related('route', 'vehicle', 'vehicle__driver')
+            context['is_master_board'] = False
+            context['terminal_name'] = terminal.name if terminal else "Unknown"
+        else:
+            all_trips = Trip.objects.none()
+            context['is_master_board'] = False
+            context['terminal_name'] = "No Terminal Selected"
         
         ongoing = all_trips.filter(status__in=['Pending Vehicle', 'Standing By', 'Loading', 'Dispatched']).count()
         completed = all_trips.filter(status='Completed').count()
